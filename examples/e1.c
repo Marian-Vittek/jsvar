@@ -46,8 +46,8 @@ int main() {
         }
 		// Actually,  all previous  jsVar actions  were buffered.   To
 		// perform real  I/O operations  one have to  call "baioPoll".
-		// It shall be  called as offen as possible.  If  there are no
-		// I/O  to  do baioPoll  waits  until  timeout, in  this  case
+		// It shall be  called as often as possible.  If  there are no
+		// I/O  to do,  baioPoll  waits until  timeout,  in this  case
 		// 100000us aka 100ms.
         baioPoll(100000);
     }
