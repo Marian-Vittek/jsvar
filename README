@@ -22,8 +22,8 @@ and C++ compilers.
 JsVar is  perfectly suited  for professional use  and it  is extracted
 from a production software. We have  used it in a brokerage server for
 streaming  prices.  Also  it  can be  usefull  in education,  embedded
-systems as  well as  in any  web server required  to stream  data.  In
-order  to use  jsVar one  has  to be  familiar with  C and  Javascript
+systems and  anywhere where a web  server is required to  stream data.
+In order  to use jsVar  one has to be  familiar with C  and Javascript
 programming languages.
 
 
