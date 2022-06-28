@@ -19,12 +19,12 @@ allows to send both binary and  text websocket messages. It is written
 in a common  subsets of C and  C++ languages and compiles  with both C
 and C++ compilers.
 
-JsVar is  perfectly suited  for professional use  and it  is extracted
-from a production software. We have  used it in a brokerage server for
-streaming  prices.  Also  it  can be  usefull  in education,  embedded
-systems and  anywhere where a web  server is required to  stream data.
-In order  to use jsVar  one has to be  familiar with C  and Javascript
-programming languages.
+JsVar  is a  single-thread  application. It  is  perfectly suited  for
+professional use, it is extracted  from a production software. We have
+used it  in a brokerage server  for streaming prices.  Also  it can be
+usefull in education, embedded systems and anywhere where a web server
+is required  to stream  data.  In  order to  use jsVar  one has  to be
+familiar with C and Javascript programming languages.
 
 
 To illustrate the ease of creation of dynamic GUIs with JsVar, here is
