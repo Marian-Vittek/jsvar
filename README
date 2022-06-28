@@ -86,11 +86,6 @@ int main() {
 
 
 
-
-
-
-
-
 //////////////////////////////////////////////////////////////////////
 
 
@@ -123,7 +118,7 @@ browser and browse to the URL:
   https://localhost:4321
 
 
-Do similar  for other examples  (e2, e3,  etc.)  except of  "eXX" which
+Do similar  for other examples  (e2, e3,  etc.)  except of  "e8" which
 demonstrates the use of plain (non SSL) server and you have to connect
 to URL:
 
@@ -147,8 +142,8 @@ The list of provided examples and features they demontrate:
 
 e1 - The simplest example showing current server time.
 e2 - Sending binary data through binary websocket messages
-e3 - Howto 'install' your custom SSL certificates
-e4 - Bidirectional communication between C and javascript
+e3 - 'Installing' your custom SSL certificates
+e4 - Bidirectional communication between C and Javascript
 e5 - Multi-page web server with HTML files.
 e6 - Multi-page web server without file system.
 e7 - International wide characters wchar_t.
