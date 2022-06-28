@@ -1,1 +1,161 @@
-To be available soon
+
+INTRODUCTION
+^^^^^^^^^^^^
+
+
+JsVar is a C library for  Linux/Unix systems allowing easy creation of
+web GUIs with websockets.
+
+JsVar provides web  and websocket servers. When a  browser connects to
+JsVar server page  a websocket connection is open and  can be used for
+bidirectional communication between C code  running on the server side
+and Javascript  code running on  the client (browser) side.   Data are
+transmitted  to javascript  immediately after  having been  sent (PUSH
+method).
+
+JsVar  can  be  used  to  provide both  plain  (unencrypted)  and  SSL
+connectivity.  It operates on both 'char*' and 'wchar_t*' strings.  It
+allows to send both binary and  text websocket messages. It is written
+in a common  subsets of C and  C++ languages and compiles  with both C
+and C++ compilers.
+
+JsVar is  perfectly suited  for professional use  and it  is extracted
+from a production software. We have  used it in a brokerage server for
+streaming  prices.  Also  it  can be  usefull  in education,  embedded
+systems as  well as  in any  web server required  to stream  data.  In
+order  to use  jsVar one  has  to be  familiar with  C and  Javascript
+programming languages.
+
+
+To illustrate the ease of creation of dynamic GUIs with JsVar, here is
+a  commented introductory  example from  our sample  set. The  example
+displays and updates current server time in a web browser page:
+
+//////////////////////////////////////////////////////////////////////
+//
+// This program demonstrates howto dynamically  update web page from C
+// using  the  function  'jsVarEvalAll'.   This  function  executes  a
+// javascript code  on all connected  clients.  This program  is using
+// Open-Ssl  for secure  web  sockets.   It has  to  be compiled  with
+// JSVAR_USE_OPEN_SSL defined.  Also  it has to be  linked with libssl
+// and libcrypto.
+//
+// The program launches a secure  webserver listening on port 4321 and
+// dynamically  updates   current  (server)  time  on   all  connected
+// browsers.
+//
+// URL: https://localhost:4321
+//
+
+#include <time.h>
+#include "jsvar.h"
+
+int main() {
+    struct jsVaraio *js;
+    time_t          lastSentTime;
+    
+    // Create new web/websocket server showing the following html page
+	// on each  request.  An  "active" pages  must include  the script
+	// "/jsvarmainjavascript.js"!
+    js = jsVarNewSinglePageServer(
+        4321, BAIO_SSL_YES, 0,
+        "<html><body><script src='/jsvarmainjavascript.js'></script>"
+		"Server Time: <span id=mainSpan>nothing here for now</span>"
+		"</body></html>"
+        );
+
+	lastSentTime = 0;
+	
+	// The main loop
+    for(;;) {
+        if (lastSentTime != time(NULL)) {
+			// Time changed.
+            lastSentTime = time(NULL);
+			// Send eval  request to all connected  clients. Note that
+			// we  send  eval  requests  only when  there  are  actual
+			// changes to be displayed. We do not send it at each pass
+			// of the loop, otherwise we risk overflow of buffers.
+            jsVarEvalAll("document.getElementById('mainSpan').innerHTML = '%.20s';", ctime(&lastSentTime));
+        }
+		// Actually,  all previous  jsVar actions  were buffered.   To
+		// perform real  I/O operations  one have to  call "baioPoll".
+		// It shall be  called as offen as possible.  If  there are no
+		// I/O  to  do baioPoll  waits  until  timeout, in  this  case
+		// 100000us aka 100ms.
+        baioPoll(100000);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+
+
+DEPENDENCIES
+^^^^^^^^^^^^
+
+If  you want  to use  SSL  you will  need Open-SSl  library.  You  can
+install it with the command:
+
+  sudo apt-get install libssl-dev
+
+JsVar uses  "sglib.h".  The file is  included in this package.  If you
+want to  use jsVar in  your own directory you  will have to  copy this
+file together with "jsvar.h" and "jsvar.c"
+
+
+
+
+GETTING STARTED
+^^^^^^^^^^^^^^^
+
+After having downloaded  and unpacked the library  goto "examples" and
+type:
+
+  make e1 run
+
+It will compile and run the example "e1".  Once running, open your web
+browser and browse to the URL:
+
+  https://localhost:4321
+
+
+Do similar  for other examples  (e2, e3,  etc.)  except of  "eXX" which
+demonstrates the use of plain (non SSL) server and you have to connect
+to URL:
+
+  http://localhost:4321
+
+
+
+DOCUMENTATION
+^^^^^^^^^^^^^
+
+For the  moment the  documentation consists  of a  set of  very simple
+commented examples.  Examples are short  and easy to understand.  They
+demonstrate  the major  functions of  the library.   All examples  are
+simplified  to   maximum,  there  are   no  bells  and   whistles,  no
+overwhelming  safety  checks.  They  are  ment  to  demontrates  jsVar
+features without  having any  meaning in  their own.   If there  is an
+interest in  this library I'll  prepare a deeper documentation  of all
+provided functionalities.
+
+The list of provided examples and features they demontrate:
+
+e1 - The simplest example showing current server time.
+e2 - Sending binary data through binary websocket messages
+e3 - Howto 'install' your custom SSL certificates
+e4 - Bidirectional communication between C and javascript
+e5 - Multi-page web server with HTML files.
+e6 - Multi-page web server without file system.
+e7 - International wide characters wchar_t.
+e8 - Plain server not linked with Open-SSL.
+e9 - Multiuser web page with "login" and "content" pages.
+
