@@ -5380,7 +5380,7 @@ static char *jsVarMainJavascript = JSVAR_STRINGIFY(
             };
             jsvar.websocket.onmessage = function (evt) { 
                 var data = evt.data;
-                if (data instanceof ArrayBuffer) {
+                if (data instanceof ArrayBuffer || data instanceof Blob) {
                     // binary frame received
                     if (jsvar.debuglevel > 100) console.log("JsVar:", (new Date()) + ": Websocket Got Data");
                     jsvar.onDataReceived(data);
