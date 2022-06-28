@@ -148,5 +148,6 @@ e5 - Multi-page web server with HTML files.
 e6 - Multi-page web server without file system.
 e7 - International wide characters wchar_t.
 e8 - Plain server not linked with Open-SSL.
-e9 - Multiuser web page with "login" and "content" pages.
+e9 - Adding custom data  to connect  structure. A multiuser  web page
+     with "login" and "content" pages.
 
