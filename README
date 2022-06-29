@@ -1,7 +1,4 @@
 
-INTRODUCTION
-^^^^^^^^^^^^
-
 
 JsVar is a C library for  Linux/Unix systems allowing easy creation of
 web GUIs with websockets.
