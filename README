@@ -17,16 +17,16 @@ in a common  subsets of C and  C++ languages and compiles  with both C
 and C++ compilers.
 
 JsVar  is a  single-thread  application. It  is  perfectly suited  for
-professional use, it is extracted  from a production software. We have
+professional use. It is extracted  from a production software. We have
 used it  in a brokerage server  for streaming prices.  Also  it can be
-usefull in education, embedded systems and anywhere where a web server
-is required  to stream  data.  In  order to  use jsVar  one has  to be
-familiar with C and Javascript programming languages.
+usefull in education, embedded systems and anywhere where a web GUI is
+appropriate especially if server is  streaming live data.  In order to
+use jsVar  one has to  be familiar  with C and  Javascript programming
+languages.
 
 
-To illustrate the ease of creation of dynamic GUIs with JsVar, here is
-a  commented introductory  example from  our sample  set. The  example
-displays and updates current server time in a web browser page:
+Creation  of web  GUIs is  pretty simple  with JsVar,  here is  a full
+example from our sample set.
 
 //////////////////////////////////////////////////////////////////////
 //
