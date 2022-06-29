@@ -22,7 +22,7 @@ int main() {
     time_t          lastSentTime;
     
     // Create new web/websocket server showing the following html page
-    // on each  request.  An  "active" pages  must include  the script
+    // on each request.   Note that "active" pages  include the script
     // "/jsvarmainjavascript.js"!
     js = jsVarNewSinglePageServer(
         4321, BAIO_SSL_YES, 0,
