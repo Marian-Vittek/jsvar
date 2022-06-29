@@ -22,62 +22,62 @@
 
 int main() {
     struct jsVaraio *js;
-	char			picname[255];
-	char			*p;
-	struct stat		st;
-	FILE			*ff;
-	int				i, len;
-	time_t			currentTime, lastSentTime;
+    char            picname[255];
+    char            *p;
+    struct stat     st;
+    FILE            *ff;
+    int             i, len;
+    time_t          currentTime, lastSentTime;
     
     // Create new web/websocket server showing the following html page on each request
-	// An "active" pages must include the script "/jsvarmainjavascript.js"!
+    // An "active" pages must include the script "/jsvarmainjavascript.js"!
     js = jsVarNewSinglePageServer(
         4321, BAIO_SSL_YES, 0,
         "<html><body><script src='/jsvarmainjavascript.js'></script>"
-		"<script>"
-		"function arrayBufferToBase64(buffer) {"
-		" var bin = '';"
-		" var a = new Uint8Array(buffer);"
-		" var len = a.byteLength;"
-		" for (var i = 0; i < len; i++) {"
+        "<script>"
+        "function arrayBufferToBase64(buffer) {"
+        " var bin = '';"
+        " var a = new Uint8Array(buffer);"
+        " var len = a.byteLength;"
+        " for (var i = 0; i < len; i++) {"
         "  bin += String.fromCharCode(a[i]);"
-		" }"
-		" return window.btoa(bin);"
-		"}"
-		"</script>"
-		"Picture Size <span id=size></span> bytes.<br>"
-		"<img id=picdiv style='width:460px;hight:340px;'></img>"
-		"</body></html>"
+        " }"
+        " return window.btoa(bin);"
+        "}"
+        "</script>"
+        "Picture Size <span id=size></span> bytes.<br>"
+        "<img id=picdiv style='width:460px;hight:340px;'></img>"
+        "</body></html>"
         );
 
-	i = 0;
+    i = 0;
     for(;;) {
-		currentTime = time(NULL);
+        currentTime = time(NULL);
         if (currentTime != lastSentTime && currentTime % 2 == 0) {
-			sprintf(picname, "pic-%02d.jpg", i);
-			if (stat(picname, &st) != 0) {
-				i = 0;
-				continue;
-			} else {
-				lastSentTime = currentTime;
-				ff = fopen(picname, "rb");
-				if (ff != NULL) {
-					len = st.st_size;
-					p = malloc(len);
-					if (p != NULL) {
-						fread(p, len, 1, ff);
-						// jsVarEvalAll("jsvar.debuglevel = 9999;");
-						// printf("sending %s: %d bytes\n", picname, len);
-						jsVarSendDataAll(p, len);
-						jsVarEvalAll("document.getElementById('picdiv').src='data:image/jpg;base64,' + arrayBufferToBase64(jsvar.data);");
-						jsVarEvalAll("document.getElementById('size').innerHTML='%d';", len);
-						free(p);
-					}
-					fclose(ff);
-					i++;
-				}
-			}
-		}
+            sprintf(picname, "pic-%02d.jpg", i);
+            if (stat(picname, &st) != 0) {
+                i = 0;
+                continue;
+            } else {
+                lastSentTime = currentTime;
+                ff = fopen(picname, "rb");
+                if (ff != NULL) {
+                    len = st.st_size;
+                    p = malloc(len);
+                    if (p != NULL) {
+                        fread(p, len, 1, ff);
+                        // jsVarEvalAll("jsvar.debuglevel = 9999;");
+                        // printf("sending %s: %d bytes\n", picname, len);
+                        jsVarSendDataAll(p, len);
+                        jsVarEvalAll("document.getElementById('picdiv').src='data:image/jpg;base64,' + arrayBufferToBase64(jsvar.data);");
+                        jsVarEvalAll("document.getElementById('size').innerHTML='%d';", len);
+                        free(p);
+                    }
+                    fclose(ff);
+                    i++;
+                }
+            }
+        }
 
         // do all pending i/o requests, wait 100ms if there is no I/O.
         baioPoll(100000);

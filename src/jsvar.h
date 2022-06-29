@@ -23,7 +23,7 @@
 //#define JSVAR_ALL_LIBRARIES               1
 
 // Specify whether wchar_t functions are to be used
-//#define JSVAR_USE_WCHAR_T				1
+//#define JSVAR_USE_WCHAR_T             1
 
 // Specify whether the library is linked with openSsl library
 //#define JSVAR_USE_OPEN_SSL                1
@@ -288,12 +288,12 @@ struct baio {
     // for other extensions and we keep the size of additional space
     int                     additionalSpaceAllocated;
 
-	// this is a user defined value, specifying "run time" type of baio pointer
-	// it is supposed that struct baio will be included into larger struct, to get
-	// the type of that larger type, use that value
-	int						userRuntimeType;
+    // this is a user defined value, specifying "run time" type of baio pointer
+    // it is supposed that struct baio will be included into larger struct, to get
+    // the type of that larger type, use that value
+    int                     userRuntimeType;
 
-	// user defined values, they must be at the end of the structure!
+    // user defined values, they must be at the end of the structure!
     union baioUserParam     u[BAIO_MAX_USER_PARAMS];
 
     // here is the end of the structure
@@ -375,7 +375,7 @@ struct jsVaraio {
 
     char                            *singlePageText;
     char                            *fileServerRootDir;
-	uint8_t							fileServerListDirectories;
+    uint8_t                         fileServerListDirectories;
     
     // here is the end of the structure
     void                            *userData[JSVAR_ZERO_SIZED_ARRAY_SIZE];
@@ -383,13 +383,13 @@ struct jsVaraio {
 
 // types of possible baio struct records created by jsvar3
 enum baioUserRuntimeType {
-	JSVAR_CON_TYPE_NONE = 29875,		// a random value
-	JSVAR_CON_FILE_WEBSERVER,
-	JSVAR_CON_SINGLE_PAGE_WEBSERVER,
-	JSVAR_CON_FILE_WEBSERVER_CLIENT,
-	JSVAR_CON_SINGLE_PAGE_WEBSERVER_CLIENT,
-	JSVAR_CON_WEBSOCKET_SERVER_CLIENT,
-	JSVAR_CON_TYPEMAX,
+    JSVAR_CON_TYPE_NONE = 29875,        // a random value
+    JSVAR_CON_FILE_WEBSERVER,
+    JSVAR_CON_SINGLE_PAGE_WEBSERVER,
+    JSVAR_CON_FILE_WEBSERVER_CLIENT,
+    JSVAR_CON_SINGLE_PAGE_WEBSERVER_CLIENT,
+    JSVAR_CON_WEBSOCKET_SERVER_CLIENT,
+    JSVAR_CON_TYPEMAX,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////

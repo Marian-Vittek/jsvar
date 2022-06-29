@@ -723,20 +723,20 @@
 /* ------------------------------- sorted double linked list (level 0) -------------------- */
 
 #define SGLIB_SORTED_DL_LIST_ADD(type, list, elem, comparator, previous, next) { \
-		type *_p_;														\
-		int _cmpres_ = 1;												\
-		if ((list) == NULL) {											\
-			(list) = (elem);											\
-			(elem)->previous = (elem)->next = NULL;						\
-		} else if (comparator((list), (elem)) >= 0) {					\
-			for(_p_ = (list); _p_->previous!=NULL && (_cmpres_=comparator(_p_->previous, (elem))) > 0; _p_=_p_->previous) ;	\
-			SGLIB_DL_LIST_ADD_BEFORE(type, _p_, elem, previous, next);	\
-			(list) = (elem);											\
-		} else {														\
-			for(_p_ = (list); _p_->next!=NULL && (_cmpres_=comparator(_p_->next, (elem))) < 0; _p_=_p_->next) ;	\
-			SGLIB_DL_LIST_ADD_AFTER(type, _p_, elem, previous, next);	\
-		}																\
-	}																	\
+        type *_p_;                                                      \
+        int _cmpres_ = 1;                                               \
+        if ((list) == NULL) {                                           \
+            (list) = (elem);                                            \
+            (elem)->previous = (elem)->next = NULL;                     \
+        } else if (comparator((list), (elem)) >= 0) {                   \
+            for(_p_ = (list); _p_->previous!=NULL && (_cmpres_=comparator(_p_->previous, (elem))) > 0; _p_=_p_->previous) ; \
+            SGLIB_DL_LIST_ADD_BEFORE(type, _p_, elem, previous, next);  \
+            (list) = (elem);                                            \
+        } else {                                                        \
+            for(_p_ = (list); _p_->next!=NULL && (_cmpres_=comparator(_p_->next, (elem))) < 0; _p_=_p_->next) ; \
+            SGLIB_DL_LIST_ADD_AFTER(type, _p_, elem, previous, next);   \
+        }                                                               \
+    }                                                                   \
 
 
 /* ------------------------------- binary tree traversal (level 0) -------------------- */
@@ -1108,7 +1108,7 @@
     return(e);\
   }\
   type *sglib_hashed_##type##_it_init(struct sglib_hashed_##type##_iterator *it, type *table[dim]) {\
-	return(sglib_hashed_##type##_it_init_on_equal(it, table, NULL, NULL));\
+    return(sglib_hashed_##type##_it_init_on_equal(it, table, NULL, NULL));\
   }\
   type *sglib_hashed_##type##_it_current(struct sglib_hashed_##type##_iterator *it) {\
     return(sglib_##type##_it_current(&it->containerIt));\
@@ -1213,7 +1213,7 @@
    ce = it->nextelem;\
    it->nextelem = NULL;\
    if (it->subcomparator != NULL) {\
-	 eq = it->equalto; \
+     eq = it->equalto; \
      scp = it->subcomparator;\
      while (ce!=NULL && scp(ce, eq)!=0) ce = ce->next;\
    }\
@@ -1299,7 +1299,7 @@
    ce = it->nextelem;\
    it->nextelem = NULL;\
    if (it->subcomparator != NULL) {\
-	 eq = it->equalto; \
+     eq = it->equalto; \
      scp = it->subcomparator;\
      while (ce!=NULL && (c=scp(ce, eq)) < 0) ce = ce->next;\
      if (ce != NULL && c > 0) ce = NULL;\
@@ -1427,7 +1427,7 @@
    ce = it->prevelem;\
    it->prevelem = NULL;\
    if (it->subcomparator != NULL) {\
-	 eq = it->equalto; \
+     eq = it->equalto; \
      scp = it->subcomparator;\
      while (ce!=NULL && scp(eq, ce)!=0) ce = ce->previous;\
    }\
@@ -1437,7 +1437,7 @@
      ce = it->nextelem;\
      it->nextelem = NULL;\
      if (it->subcomparator != NULL) {\
-	   eq = it->equalto; \
+       eq = it->equalto; \
        scp = it->subcomparator;\
        while (ce!=NULL && scp(ce, eq)!=0) ce = ce->next;\
      }\
@@ -1975,7 +1975,7 @@ void sglib___##type##_consistency_check(type *t) {\
   __s__ = (unsigned char *) (p);\
   __e__ = __s__ + (size);\
   for(__c__= *__s__; __s__<__e__; __c__= *++__s__) {\
-	__h__+=__c__; __h__+=(__h__<<10); __h__^=(__h__>>6);\
+    __h__+=__c__; __h__+=(__h__<<10); __h__^=(__h__>>6);\
   }\
   __h__+=(__h__<<3); __h__^=(__h__>>11); __h__+=(__h__<<15);\
   (res) = __h__;\
@@ -1983,12 +1983,12 @@ void sglib___##type##_consistency_check(type *t) {\
 
 #define SGLIB_HASH_FUN_STR(p, res) {\
   register unsigned __h__;\
-  register unsigned char *__s__;				\
+  register unsigned char *__s__;                \
   register unsigned char __c__;\
   __h__ = 0;\
   __s__ = (unsigned char *) (p);\
   for(__c__= *__s__; __c__ != 0; __c__= *++__s__) {\
-	__h__+=__c__; __h__+=(__h__<<10); __h__^=(__h__>>6);\
+    __h__+=__c__; __h__+=(__h__<<10); __h__^=(__h__>>6);\
   }\
   __h__+=(__h__<<3); __h__^=(__h__>>11); __h__+=(__h__<<15);\
   (res) = __h__;\

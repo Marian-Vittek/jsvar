@@ -3,12 +3,12 @@
 JsVar is a C library for  Linux/Unix systems allowing easy creation of
 web GUIs with websockets.
 
-JsVar provides web  and websocket servers. When a  browser connects to
-JsVar server page  a websocket connection is open and  can be used for
-bidirectional communication between C code  running on the server side
-and Javascript  code running on  the client (browser) side.   Data are
-transmitted  to javascript  immediately after  having been  sent (PUSH
-method).
+JsVar provides compact and lightweight web and websocket servers. When
+a browser connects to JsVar server page a websocket connection is open
+and can be used for bidirectional communication between C code running
+on the server side and Javascript code running on the client (browser)
+side.   Data are  transmitted to  javascript immediately  after having
+been sent (PUSH method).
 
 JsVar  can  be  used  to  provide both  plain  (unencrypted)  and  SSL
 connectivity.  It operates on both 'char*' and 'wchar_t*' strings.  It

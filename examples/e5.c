@@ -24,11 +24,11 @@ int main() {
     // Create new web/websocket server having "./e5www" as its root directory.
     js = jsVarNewFileServer(4321, BAIO_SSL_YES, 0, "./e5www");
 
-	lastSentTime = 0;
+    lastSentTime = 0;
     for(;;) {
         if (lastSentTime != time(NULL)) {
             lastSentTime = time(NULL);
-			// send eval request to all connected clients
+            // send eval request to all connected clients
             jsVarEvalAll("$('#mainSpan').html('%.20s');", ctime(&lastSentTime));
         }
         // do all pending i/o requests, wait 100ms if there is no I/O.

@@ -131,7 +131,7 @@ int jsVarDebugLevel = 0;
 #define JsVarInternalCheck(x) {                                             \
         if (! (x)) {                                                    \
             printf("%s: Error: Internal check %s failed at %s:%d\n", JSVAR_PRINT_PREFIX(), #x, __FILE__, __LINE__); \
-            fflush(stdout); abort();									\
+            fflush(stdout); abort();                                    \
         }                                                               \
     }
 
@@ -153,8 +153,8 @@ struct baioOpenSocketFileData {
 };
 
 struct wsaioStrList {
-	char				*s;
-	struct wsaioStrList *next;
+    char                *s;
+    struct wsaioStrList *next;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -739,21 +739,21 @@ JSVAR_STATIC int jsVarWDstrAppendVPrintf(struct jsVarWDstr *s, wchar_t *fmt, va_
     va_list     arg_ptr_copy;
 
     n = 0;
-	d = s->s+s->size;
-	dsize = s->allocatedSize - s->size;
-	va_copy(arg_ptr_copy, arg_ptr);
-	n = vswprintf(d, dsize, fmt, arg_ptr_copy);
-	// TODO: Review this stuff
-	while (n < 0) {
-		jsVarWDstrExpandToSize(s, s->allocatedSize * 2 + 1024);
-		d = s->s+s->size;
-		dsize = s->allocatedSize - s->size;
-		va_copy_end(arg_ptr_copy);
-		va_copy(arg_ptr_copy, arg_ptr);
-		n = vswprintf(d, dsize, fmt, arg_ptr_copy);
-	}
-	JsVarInternalCheck(n >= 0);
-	va_copy_end(arg_ptr_copy);
+    d = s->s+s->size;
+    dsize = s->allocatedSize - s->size;
+    va_copy(arg_ptr_copy, arg_ptr);
+    n = vswprintf(d, dsize, fmt, arg_ptr_copy);
+    // TODO: Review this stuff
+    while (n < 0) {
+        jsVarWDstrExpandToSize(s, s->allocatedSize * 2 + 1024);
+        d = s->s+s->size;
+        dsize = s->allocatedSize - s->size;
+        va_copy_end(arg_ptr_copy);
+        va_copy(arg_ptr_copy, arg_ptr);
+        n = vswprintf(d, dsize, fmt, arg_ptr_copy);
+    }
+    JsVarInternalCheck(n >= 0);
+    va_copy_end(arg_ptr_copy);
     s->size += n;
     return(n);
 }
@@ -829,9 +829,9 @@ JSVAR_STATIC void jsVarWDstrClear(struct jsVarWDstr *s) {
 
 // flags: 0 == ALL, otherwise single occurence
 JSVAR_STATIC int jsVarWDstrReplace(struct jsVarWDstr *s, wchar_t *str, wchar_t *byStr, int allOccurencesFlag) {
-    struct jsVarWDstr 	*d;
+    struct jsVarWDstr   *d;
     int                 i, slen, stlen;
-    wchar_t            	*ss, *cc;
+    wchar_t             *ss, *cc;
 
     stlen = wcslen(str);
     slen = s->size;
@@ -1291,21 +1291,21 @@ enum baioTypes {
 #define SSL                                 void
 #define SSL_CTX                             void
 #define X509_STORE_CTX                      void
-#define BIO         						void
-#define X509       							void
-#define EVP_PKEY    						void
-#define BIO_new_mem_buf(...)				(NULL)
-#define PEM_read_bio_X509(...)				(NULL)
-#define X509_free(...)						(NULL)
-#define BIO_free(...)						(NULL)
-#define PEM_read_bio_PrivateKey(...)		(NULL)
-#define EVP_PKEY_free(x)					{}
+#define BIO                                 void
+#define X509                                void
+#define EVP_PKEY                            void
+#define BIO_new_mem_buf(...)                (NULL)
+#define PEM_read_bio_X509(...)              (NULL)
+#define X509_free(...)                      (NULL)
+#define BIO_free(...)                       (NULL)
+#define PEM_read_bio_PrivateKey(...)        (NULL)
+#define EVP_PKEY_free(x)                    {}
 #define SSL_free(x)                         {}
 #define SSL_load_error_strings()            {}
 #define SSL_CTX_new(x)                      (NULL)
 #define SSL_CTX_free(x)                     {}
-#define SSL_CTX_use_certificate(...)		(-1)
-#define SSL_CTX_use_PrivateKey(...)			(-1)
+#define SSL_CTX_use_certificate(...)        (-1)
+#define SSL_CTX_use_PrivateKey(...)         (-1)
 #define SSL_CTX_use_certificate_file(...)   (-1)
 #define SSL_CTX_use_PrivateKey_file(...)    (-1)
 #define SSL_set_tlsext_host_name(...)       (-1)
@@ -1337,57 +1337,57 @@ static SSL_CTX  *baioSslContext;
 char     *baioSslServerKeyFile = NULL; // "server.key";
 char     *baioSslServerCertFile = NULL; // "server.crt";
 char     *baioSslServerCertPem = 
-	"-----BEGIN CERTIFICATE-----\n"
-	"MIIDYjCCAkqgAwIBAgIJAJ4o1tEEggimMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV\n"
-	"BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX\n"
-	"aWRnaXRzIFB0eSBMdGQwIBcNMjIwNjI3MTM0MDM2WhgPMjE1OTA1MjAxMzQwMzZa\n"
-	"MEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJ\n"
-	"bnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw\n"
-	"ggEKAoIBAQDBpoSqjn63T3M1RHc3eVUdY7p8MoDX0pBlw+9Tzhtj/A0oHtwpO6Lp\n"
-	"V4iFaYDWVyuTZuR2P/SHbT6i8vcihibdA56U9hyefkZSCk/d9wwNL9RhZ51iK2JR\n"
-	"9/+2Y+KpIUOBbRU/2z8qQAvA4XZD1vtuHYZsgC0Fjlcg7ijv3O2MQ7r1YnJAwIIA\n"
-	"ej88o6VPAm2fSzE2QTqMVYh7ZyeoCCCQTtAj4zLwEyrLOTgysPB5javqlw327FDU\n"
-	"fVLF8dUJbwvtqGiLWMcil19YJolBDPCmCCRTbqZRFB81ZM7xPxS8D+kDhSF55dbH\n"
-	"FykT4QhemOn4qdZChjcJ77//c87CiQZPAgMBAAGjUzBRMB0GA1UdDgQWBBT39hTw\n"
-	"axP4xig+j06HeqTGm5Mi4zAfBgNVHSMEGDAWgBT39hTwaxP4xig+j06HeqTGm5Mi\n"
-	"4zAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQC25qzNYH4uOstM\n"
-	"AH8ku6xo1UzSBZB6cZJGQkXy11NPMGV+16MCI9YppknlTvxNFY2JJRSEkKHgiZRC\n"
-	"L7llj49DD+EwU/fLt3DrM0hremb4BxgB+elVfkgchKOkEmp97j0xUIdq9ROH2CZv\n"
-	"/5VI8oyY2YDb/pEShxxSVeRRu3gEWIpnlA4HkBKpELzkZvq0SaCR8MknzGB5ApzZ\n"
-	"4wgGer9Ww6u7AXflsOAtjJchBAIe6iTUlflUXhdBYUrgLPgXXSvjD7pY+eta7QFa\n"
-	"EXsfuOksGMYA1iMFGOznXBleK0t57P9BShCTLN6bXbWRjsUDL+0d8geOk7ircYbY\n"
-	"qLw0pmgF\n"
-	"-----END CERTIFICATE-----\n"
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIIDYjCCAkqgAwIBAgIJAJ4o1tEEggimMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV\n"
+    "BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX\n"
+    "aWRnaXRzIFB0eSBMdGQwIBcNMjIwNjI3MTM0MDM2WhgPMjE1OTA1MjAxMzQwMzZa\n"
+    "MEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJ\n"
+    "bnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw\n"
+    "ggEKAoIBAQDBpoSqjn63T3M1RHc3eVUdY7p8MoDX0pBlw+9Tzhtj/A0oHtwpO6Lp\n"
+    "V4iFaYDWVyuTZuR2P/SHbT6i8vcihibdA56U9hyefkZSCk/d9wwNL9RhZ51iK2JR\n"
+    "9/+2Y+KpIUOBbRU/2z8qQAvA4XZD1vtuHYZsgC0Fjlcg7ijv3O2MQ7r1YnJAwIIA\n"
+    "ej88o6VPAm2fSzE2QTqMVYh7ZyeoCCCQTtAj4zLwEyrLOTgysPB5javqlw327FDU\n"
+    "fVLF8dUJbwvtqGiLWMcil19YJolBDPCmCCRTbqZRFB81ZM7xPxS8D+kDhSF55dbH\n"
+    "FykT4QhemOn4qdZChjcJ77//c87CiQZPAgMBAAGjUzBRMB0GA1UdDgQWBBT39hTw\n"
+    "axP4xig+j06HeqTGm5Mi4zAfBgNVHSMEGDAWgBT39hTwaxP4xig+j06HeqTGm5Mi\n"
+    "4zAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQC25qzNYH4uOstM\n"
+    "AH8ku6xo1UzSBZB6cZJGQkXy11NPMGV+16MCI9YppknlTvxNFY2JJRSEkKHgiZRC\n"
+    "L7llj49DD+EwU/fLt3DrM0hremb4BxgB+elVfkgchKOkEmp97j0xUIdq9ROH2CZv\n"
+    "/5VI8oyY2YDb/pEShxxSVeRRu3gEWIpnlA4HkBKpELzkZvq0SaCR8MknzGB5ApzZ\n"
+    "4wgGer9Ww6u7AXflsOAtjJchBAIe6iTUlflUXhdBYUrgLPgXXSvjD7pY+eta7QFa\n"
+    "EXsfuOksGMYA1iMFGOznXBleK0t57P9BShCTLN6bXbWRjsUDL+0d8geOk7ircYbY\n"
+    "qLw0pmgF\n"
+    "-----END CERTIFICATE-----\n"
         ;
 char     *baioSslServerKeyPem = 
-	"-----BEGIN PRIVATE KEY-----\n"
-	"MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDBpoSqjn63T3M1\n"
-	"RHc3eVUdY7p8MoDX0pBlw+9Tzhtj/A0oHtwpO6LpV4iFaYDWVyuTZuR2P/SHbT6i\n"
-	"8vcihibdA56U9hyefkZSCk/d9wwNL9RhZ51iK2JR9/+2Y+KpIUOBbRU/2z8qQAvA\n"
-	"4XZD1vtuHYZsgC0Fjlcg7ijv3O2MQ7r1YnJAwIIAej88o6VPAm2fSzE2QTqMVYh7\n"
-	"ZyeoCCCQTtAj4zLwEyrLOTgysPB5javqlw327FDUfVLF8dUJbwvtqGiLWMcil19Y\n"
-	"JolBDPCmCCRTbqZRFB81ZM7xPxS8D+kDhSF55dbHFykT4QhemOn4qdZChjcJ77//\n"
-	"c87CiQZPAgMBAAECggEBAIj1i5jRJR/iyjmfTa3nW2Jo2UjjsypxWv0OgaLE/6xM\n"
-	"ZMW+Zbmn2wWrifvJbXyqtEARIn3bp8dsZUN8EXvSY4Qm/i6ejgkuh++YKXp0MorV\n"
-	"DCFD1hTLWENe4fUOWg2CYCsWilPabaclGur0yt8aGkN8EEmGsdDfJhI9Pqi+mSd8\n"
-	"t6BEjY3Xl5akbhRkI5K1M/90/KdpNFZ7s789Pi35tvuadP8f1RHxuy9Q2befb8i4\n"
-	"Q+5SbeSo82LbWHoK87Nilx79WzSKr+cc7UUn+z+8a8oCH8btVBzvWzuUq+ramIuM\n"
-	"qAavwHtYifKxQUhjkh5nFijxMD3omIqGqINj39yi8jECgYEA8f5Vyg4BFayM3Hcc\n"
-	"xPrRebQFXyf+I0eUnQp4odwPJX0AA25X6gBtTQ1G7+qxC7Eb8aLnxLPEUTm2Vvr7\n"
-	"CcmsZTXVXQzqpA23f8U6wXGPyr4FXRi2kTur54hZf41FsrcXwUPmqzeDOUyRhCAz\n"
-	"Q0Jug5eCU8qsuRzR9ydmqBzQywcCgYEAzNvf+1tivlxa+1HjmQyGabePbnNNTfAL\n"
-	"xcvTNAVbn4Mb5UtvjAVHAbU96kaicOcKs8EHudmF1dFt+MwTzAl48tQOQyDb4Mie\n"
-	"TSEPu8WSPN/Xu4rR0z9Djey0Iv4/UcI4ziEUk9W395SsNOKYw03bB73RjCkeembf\n"
-	"FLP+nk1KcHkCgYEArVQLZI8FTd3qgtq5+4jfUzmTA2YkzGYv1w+x+dUh8CsJQGvf\n"
-	"glbN8vuIjL1gFEzGBBw3v5c3DSq2JLTd7FPMLC4T5fMjeV/tyBGflQDfCktykgzq\n"
-	"bzn7Vfo+iHLKskgcNqyI4qf/UKI8NBPQQ+OoPo7dpWCsuGYhKdLJ363MCy8CgYEA\n"
-	"mYqy9dIo0ESobHWUAMJCfDn4ZvBEoIWqTTXXtsXNRmEeJ13C3U+XSNBu94i5d6Wz\n"
-	"f8bN454FkZzGsBNFQ0hWPqpxhh66rl+vRl/hSvtp//ZF22rQmWRxXY5r9U5aZw0L\n"
-	"RnPE2Ij2ubnU2E598OQJpmO/Cy5GibdQvFOsIzoK8QECgYBBJhiCXcvbxgKxiyh+\n"
-	"/emFRxgvEPqfQjuqiERXy705ks7D96DVaB7hAv3PMmWDlOVu2iPZtvFMCdSV7168\n"
-	"wduW08OZ7ih0n6Zr7W9UKyE2sct5Nqvlo8yo/Ucqic+Mm/y6eLzP6XJZ6lz+V0u6\n"
-	"JM5zrrRUGrZTpVzTeKUCMkg9VA==\n"
-	"-----END PRIVATE KEY-----\n"
+    "-----BEGIN PRIVATE KEY-----\n"
+    "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDBpoSqjn63T3M1\n"
+    "RHc3eVUdY7p8MoDX0pBlw+9Tzhtj/A0oHtwpO6LpV4iFaYDWVyuTZuR2P/SHbT6i\n"
+    "8vcihibdA56U9hyefkZSCk/d9wwNL9RhZ51iK2JR9/+2Y+KpIUOBbRU/2z8qQAvA\n"
+    "4XZD1vtuHYZsgC0Fjlcg7ijv3O2MQ7r1YnJAwIIAej88o6VPAm2fSzE2QTqMVYh7\n"
+    "ZyeoCCCQTtAj4zLwEyrLOTgysPB5javqlw327FDUfVLF8dUJbwvtqGiLWMcil19Y\n"
+    "JolBDPCmCCRTbqZRFB81ZM7xPxS8D+kDhSF55dbHFykT4QhemOn4qdZChjcJ77//\n"
+    "c87CiQZPAgMBAAECggEBAIj1i5jRJR/iyjmfTa3nW2Jo2UjjsypxWv0OgaLE/6xM\n"
+    "ZMW+Zbmn2wWrifvJbXyqtEARIn3bp8dsZUN8EXvSY4Qm/i6ejgkuh++YKXp0MorV\n"
+    "DCFD1hTLWENe4fUOWg2CYCsWilPabaclGur0yt8aGkN8EEmGsdDfJhI9Pqi+mSd8\n"
+    "t6BEjY3Xl5akbhRkI5K1M/90/KdpNFZ7s789Pi35tvuadP8f1RHxuy9Q2befb8i4\n"
+    "Q+5SbeSo82LbWHoK87Nilx79WzSKr+cc7UUn+z+8a8oCH8btVBzvWzuUq+ramIuM\n"
+    "qAavwHtYifKxQUhjkh5nFijxMD3omIqGqINj39yi8jECgYEA8f5Vyg4BFayM3Hcc\n"
+    "xPrRebQFXyf+I0eUnQp4odwPJX0AA25X6gBtTQ1G7+qxC7Eb8aLnxLPEUTm2Vvr7\n"
+    "CcmsZTXVXQzqpA23f8U6wXGPyr4FXRi2kTur54hZf41FsrcXwUPmqzeDOUyRhCAz\n"
+    "Q0Jug5eCU8qsuRzR9ydmqBzQywcCgYEAzNvf+1tivlxa+1HjmQyGabePbnNNTfAL\n"
+    "xcvTNAVbn4Mb5UtvjAVHAbU96kaicOcKs8EHudmF1dFt+MwTzAl48tQOQyDb4Mie\n"
+    "TSEPu8WSPN/Xu4rR0z9Djey0Iv4/UcI4ziEUk9W395SsNOKYw03bB73RjCkeembf\n"
+    "FLP+nk1KcHkCgYEArVQLZI8FTd3qgtq5+4jfUzmTA2YkzGYv1w+x+dUh8CsJQGvf\n"
+    "glbN8vuIjL1gFEzGBBw3v5c3DSq2JLTd7FPMLC4T5fMjeV/tyBGflQDfCktykgzq\n"
+    "bzn7Vfo+iHLKskgcNqyI4qf/UKI8NBPQQ+OoPo7dpWCsuGYhKdLJ363MCy8CgYEA\n"
+    "mYqy9dIo0ESobHWUAMJCfDn4ZvBEoIWqTTXXtsXNRmEeJ13C3U+XSNBu94i5d6Wz\n"
+    "f8bN454FkZzGsBNFQ0hWPqpxhh66rl+vRl/hSvtp//ZF22rQmWRxXY5r9U5aZw0L\n"
+    "RnPE2Ij2ubnU2E598OQJpmO/Cy5GibdQvFOsIzoK8QECgYBBJhiCXcvbxgKxiyh+\n"
+    "/emFRxgvEPqfQjuqiERXy705ks7D96DVaB7hAv3PMmWDlOVu2iPZtvFMCdSV7168\n"
+    "wduW08OZ7ih0n6Zr7W9UKyE2sct5Nqvlo8yo/Ucqic+Mm/y6eLzP6XJZ6lz+V0u6\n"
+    "JM5zrrRUGrZTpVzTeKUCMkg9VA==\n"
+    "-----END PRIVATE KEY-----\n"
         ;
 //static char       *baioSslTrustedCertFile = "trusted.pem";
 
@@ -2484,7 +2484,7 @@ JSVAR_STATIC int baioSslLibraryInit() {
 
     // We are probably sticked with SSL version 2 because of some servers
     baioSslContext = SSL_CTX_new(SSLv23_method());
-	// A more recommended metod (according doc)
+    // A more recommended metod (according doc)
     // baioSslContext = SSL_CTX_new(TLS_method());
 
     if (baioSslContext == NULL) {
@@ -2643,7 +2643,7 @@ static void baioSslAccept(struct baio *bb) {
     ERR_clear_error();
     r = SSL_accept(bb->sslHandle);
 
-	// printf("%s: ssl_accept returned %d\n", JSVAR_PRINT_PREFIX(), r); fflush(stdout);
+    // printf("%s: ssl_accept returned %d\n", JSVAR_PRINT_PREFIX(), r); fflush(stdout);
     if (r == 1) {
         // accepted
         JSVAR_CALLBACK_CALL(bb->callBackOnAccept, callBack(bb));
@@ -2653,7 +2653,7 @@ static void baioSslAccept(struct baio *bb) {
 
     // not accepted
     err = SSL_get_error(bb->sslHandle, r);
-	// printf("%s: err == %d\n", JSVAR_PRINT_PREFIX(), err); fflush(stdout);	
+    // printf("%s: err == %d\n", JSVAR_PRINT_PREFIX(), err); fflush(stdout);    
     if (err == SSL_ERROR_WANT_READ) {
         bb->status |= BAIO_BLOCKED_FOR_READ_IN_SSL_ACCEPT;
     } else if (err == SSL_ERROR_WANT_WRITE) {
@@ -4623,58 +4623,58 @@ int wsaioHttpSendFileAsync(struct wsaio *ww, char *fname, char *additionalHeader
 }
 
 static int wsaioStrListCmp(struct wsaioStrList *e1, struct wsaioStrList *e2) {
-	return(strcmp(e1->s, e2->s));
+    return(strcmp(e1->s, e2->s));
 }
 
 int wsaioHttpSendDirectory(struct wsaio *ww, char *path, char *dirname, char *additionalHeaders) {
-    int             	r;
-    struct baio     	*bb;
-	DIR 				*d;
-	struct dirent 		*dir;
-	struct stat			st;
-	char				ppp[JSVAR_TMP_STRING_SIZE];
-	struct wsaioStrList *ll, *ee;
-	
-	bb = &ww->b;
+    int                 r;
+    struct baio         *bb;
+    DIR                 *d;
+    struct dirent       *dir;
+    struct stat         st;
+    char                ppp[JSVAR_TMP_STRING_SIZE];
+    struct wsaioStrList *ll, *ee;
+    
+    bb = &ww->b;
 
-	baioPrintfToBuffer(
-		bb,
-		"<html>\n<head><title>Index of %s</title><style>td{padding:3px}</style></head>\n"
-		"<body>\n<h1>Index of %s</h1>\n<table>\n<tr><th>Name</th><th>Last modified</th><th>Size</th></tr>\n",
-		dirname, dirname
-		);
+    baioPrintfToBuffer(
+        bb,
+        "<html>\n<head><title>Index of %s</title><style>td{padding:3px}</style></head>\n"
+        "<body>\n<h1>Index of %s</h1>\n<table>\n<tr><th>Name</th><th>Last modified</th><th>Size</th></tr>\n",
+        dirname, dirname
+        );
 
-	ll = NULL;
-	d = opendir(path);
-	if (d != NULL) {
-		while ((dir = readdir(d)) != NULL) {
-			JSVAR_ALLOC(ee, struct wsaioStrList);
-			ee->s = strDuplicate(dir->d_name);
-			ee->next = ll;
-			ll = ee;
-		}
-		closedir(d);
-		SGLIB_LIST_SORT(struct wsaioStrList, ll, wsaioStrListCmp, next);
-		while(ll != NULL) {
-			snprintf(ppp, JSVAR_TMP_STRING_SIZE, "%s%s", path, ll->s);
-			ppp[JSVAR_TMP_STRING_SIZE-1] = 0;
-			if (stat(ppp, &st) == 0) {
-				baioPrintfToBuffer(	
-					bb,
-					"<tr><td><a href='%s%s'>%s%c</a></td><td align='right'>%.20s</td><td align='right'>%d</td></tr>\n",
-					dirname, ll->s, ll->s, (S_ISDIR(st.st_mode)?'/':' '), ctime(&st.st_mtim.tv_sec), st.st_size
-					);
-			}
-			ee = ll->next;
-			JSVAR_FREE(ll->s);
-			JSVAR_FREE(ll);
-			ll = ee;
-		}
-	}
+    ll = NULL;
+    d = opendir(path);
+    if (d != NULL) {
+        while ((dir = readdir(d)) != NULL) {
+            JSVAR_ALLOC(ee, struct wsaioStrList);
+            ee->s = strDuplicate(dir->d_name);
+            ee->next = ll;
+            ll = ee;
+        }
+        closedir(d);
+        SGLIB_LIST_SORT(struct wsaioStrList, ll, wsaioStrListCmp, next);
+        while(ll != NULL) {
+            snprintf(ppp, JSVAR_TMP_STRING_SIZE, "%s%s", path, ll->s);
+            ppp[JSVAR_TMP_STRING_SIZE-1] = 0;
+            if (stat(ppp, &st) == 0) {
+                baioPrintfToBuffer( 
+                    bb,
+                    "<tr><td><a href='%s%s'>%s%c</a></td><td align='right'>%.20s</td><td align='right'>%d</td></tr>\n",
+                    dirname, ll->s, ll->s, (S_ISDIR(st.st_mode)?'/':' '), ctime(&st.st_mtim.tv_sec), st.st_size
+                    );
+            }
+            ee = ll->next;
+            JSVAR_FREE(ll->s);
+            JSVAR_FREE(ll);
+            ll = ee;
+        }
+    }
 
-	baioPrintfToBuffer(bb, "<tr><th colspan=3><hr></th></tr>\n</table>\n<address>JsVar Server</address></body>\n</html>\n");
-	wsaioHttpFinishAnswer(ww, "200 OK", "text/html", additionalHeaders);
-	
+    baioPrintfToBuffer(bb, "<tr><th colspan=3><hr></th></tr>\n</table>\n<address>JsVar Server</address></body>\n</html>\n");
+    wsaioHttpFinishAnswer(ww, "200 OK", "text/html", additionalHeaders);
+    
     return(r);
 }
 
@@ -5316,23 +5316,23 @@ static char *jsVarMainJavascript = JSVAR_STRINGIFY(
         throw new Error("JsVar: Variable 'jsvar' is not an object!");
     }
     \n
-	//
-	// You can customize behavior by overwriting those objects
-	//
-	// flag whether websocket is connected to the server
-	jsvar.connected = false;
-	// you set your debuging level by overwriting this value
-	jsvar.debuglevel = 0;
-	// overwrite it if you need custom action when websocket connects
-	jsvar.onConnected = null;
-	// overwrite it if you need custom action when binary data received from websocket
-	jsvar.onDataReceived = function(msg) { jsvar.data = msg; };
-	// overwrite it if you need custom action when eval request received from websocket
-	jsvar.onEvalMessageReceived = function(msg) { eval(msg); };
-	// overwrite it if you need custom action when websocket disconnects
-	jsvar.onDisconnected = null;
-	//
-	\n
+    //
+    // You can customize behavior by overwriting those objects
+    //
+    // flag whether websocket is connected to the server
+    jsvar.connected = false;
+    // you set your debuging level by overwriting this value
+    jsvar.debuglevel = 0;
+    // overwrite it if you need custom action when websocket connects
+    jsvar.onConnected = null;
+    // overwrite it if you need custom action when binary data received from websocket
+    jsvar.onDataReceived = function(msg) { jsvar.data = msg; };
+    // overwrite it if you need custom action when eval request received from websocket
+    jsvar.onEvalMessageReceived = function(msg) { eval(msg); };
+    // overwrite it if you need custom action when websocket disconnects
+    jsvar.onDisconnected = null;
+    //
+    \n
     jsvar.initialize = function() {
         // names defined here do not pollute global namespace as they are local to function
         var oldOnload = window.onload;
@@ -5340,32 +5340,32 @@ static char *jsVarMainJavascript = JSVAR_STRINGIFY(
             if (oldOnload) oldOnload(evt);
             // do not start websocket "immediately", use timeout to start when loading of the script is finished
             setTimeout(function(){ 
-					if (jsvar.debuglevel > 0) console.log("JsVar:", (new Date()) + ": Start.");
-					jsvarOpenWebSocket();
+                    if (jsvar.debuglevel > 0) console.log("JsVar:", (new Date()) + ": Start.");
+                    jsvarOpenWebSocket();
                 }, 100);
         }\n;
-		// an auxiliary function
+        // an auxiliary function
         function removeAppendixAfter(s, delimiter) {
             var res = s;
             var i = res.indexOf(delimiter);
             if (i >= 0) res = res.substring(0, i);
             return(res);
         }
-		\n
-		// here we hold active websocket connection
+        \n
+        // here we hold active websocket connection
         jsvar.websocket = null;
-		// This is the function allowing callbacks to C code
-		jsvar.callback = function(msg) {
-			// console.log("sending message", msg, nlen, index, vlen);
-			if (jsvar.websocket != null) jsvar.websocket.send(msg);
-		}\n;
+        // This is the function allowing callbacks to C code
+        jsvar.callback = function(msg) {
+            // console.log("sending message", msg, nlen, index, vlen);
+            if (jsvar.websocket != null) jsvar.websocket.send(msg);
+        }\n;
         function jsvarOpenWebSocket() {
             if (jsvar.websocket != null) jsvar.websocket.close();
             var wsurl = document.URL.replace("http", "ws");
             wsurl = removeAppendixAfter(wsurl, '?');
             wsurl = removeAppendixAfter(wsurl, '#');
             jsvar.websocket = new WebSocket(wsurl, "jsync");
-			jsvar.websocket.binaryType = "arraybuffer";
+            jsvar.websocket.binaryType = "arraybuffer";
             jsvar.websocket.onopen = function() {
                 if (jsvar.debuglevel > 10) console.log("JsVar:", (new Date()) + ": Websocket to "+wsurl+" is open");
                 if (jsvar.onConnected != null) jsvar.onConnected();
@@ -5378,7 +5378,7 @@ static char *jsVarMainJavascript = JSVAR_STRINGIFY(
                     if (jsvar.debuglevel > 100) console.log("JsVar:", (new Date()) + ": Websocket Got Data");
                     jsvar.onDataReceived(data);
                 } else {
-					// text frame, i.e. an eval request
+                    // text frame, i.e. an eval request
                     if (jsvar.debuglevel > 100) console.log("JsVar:", (new Date()) + ": Websocket Got Message: ", data);
                     jsvar.onEvalMessageReceived(data);
                 }
@@ -5390,7 +5390,7 @@ static char *jsVarMainJavascript = JSVAR_STRINGIFY(
                 jsvar.websocket = null;
                 // try to reconnect
                 setTimeout(jsvarOpenWebSocket, 5000);
-            };			
+            };          
         }\n;
     }\n;
     \n
@@ -5452,12 +5452,12 @@ static int jsVarCallbackOnWwwGetRequestSinglePage(struct wsaio *ww, char *uri) {
     jj = (struct jsVaraio *) ww;
     bb = &ww->b;
 
-	if (strcmp(uri, "/jsvarmainjavascript.js") == 0) {
-		baioPrintfToBuffer(bb, "%s", jsVarMainJavascript);
-		wsaioHttpFinishAnswer(ww, "200 OK", "text/javascript", NULL);
-	} else {
-		baioPrintfToBuffer(bb, "%s", jj->singlePageText);
-		wsaioHttpFinishAnswer(ww, "200 OK", "text/html", NULL);
+    if (strcmp(uri, "/jsvarmainjavascript.js") == 0) {
+        baioPrintfToBuffer(bb, "%s", jsVarMainJavascript);
+        wsaioHttpFinishAnswer(ww, "200 OK", "text/javascript", NULL);
+    } else {
+        baioPrintfToBuffer(bb, "%s", jj->singlePageText);
+        wsaioHttpFinishAnswer(ww, "200 OK", "text/html", NULL);
     }
     return(1);
 }
@@ -5466,120 +5466,120 @@ static int jsVarCallbackOnWwwGetRequestFile(struct wsaio *ww, char *uri) {
     struct jsVaraio     *jj;
     int                 r, jslen, plen;
     struct baio         *bb;
-	int                 i,j;
-	char                nuri[JSVAR_PATH_MAX];
-	char                path[2*JSVAR_PATH_MAX];
-	struct stat         st;
+    int                 i,j;
+    char                nuri[JSVAR_PATH_MAX];
+    char                path[2*JSVAR_PATH_MAX];
+    struct stat         st;
 
     jj = (struct jsVaraio *) ww;
     bb = &ww->b;
 
-	if (strcmp(uri, "/jsvarmainjavascript.js") == 0) {
-		baioPrintfToBuffer(bb, "%s", jsVarMainJavascript);
-		wsaioHttpFinishAnswer(ww, "200 OK", "text/javascript", NULL);
-		return(1);
-	}
+    if (strcmp(uri, "/jsvarmainjavascript.js") == 0) {
+        baioPrintfToBuffer(bb, "%s", jsVarMainJavascript);
+        wsaioHttpFinishAnswer(ww, "200 OK", "text/javascript", NULL);
+        return(1);
+    }
 
-	ww = &jj->w;
-	bb = &ww->b;
+    ww = &jj->w;
+    bb = &ww->b;
 
-	// printf("%s: FileServer: GET %s\n", JSVAR_PRINT_PREFIX(), uri);
+    // printf("%s: FileServer: GET %s\n", JSVAR_PRINT_PREFIX(), uri);
 
-	if (uri == NULL) goto fail;
-	if (uri[0] != '/') goto fail;
+    if (uri == NULL) goto fail;
+    if (uri[0] != '/') goto fail;
 
-	// resolve the name to avoid toxic names like "/../../secret.txt"
-	for(i=0,j=0; i<JSVAR_PATH_MAX && uri[j];) {
-		nuri[i] = uri[j];
-		if (uri[j]=='/' && uri[j+1] == '.' && (uri[j+2] == '/' || uri[j+2] == 0)) {
-			j += 2;
-		} else if (uri[j]=='/' && uri[j+1] == '.' && uri[j+2] == '.' && (uri[j+3] == '/' || uri[j+3] == 0)) {
-			j += 3;
-			if (i <= 0) goto fail;
-			for(i--; i>=0 && nuri[i] != '/'; i--) ;
-			if (i < 0) goto fail;
-			i ++;
-		} else {
-			nuri[i++] = uri[j++];
-		}
-	}
-	if (i <= 0 || i >= sizeof(nuri) - 1) goto fail;
-	nuri[i] = 0;
-	
-	snprintf(path, sizeof(path), "%s%s", jj->fileServerRootDir, nuri);
-	path[sizeof(path)-1] = 0;
-	plen = strlen(path);
+    // resolve the name to avoid toxic names like "/../../secret.txt"
+    for(i=0,j=0; i<JSVAR_PATH_MAX && uri[j];) {
+        nuri[i] = uri[j];
+        if (uri[j]=='/' && uri[j+1] == '.' && (uri[j+2] == '/' || uri[j+2] == 0)) {
+            j += 2;
+        } else if (uri[j]=='/' && uri[j+1] == '.' && uri[j+2] == '.' && (uri[j+3] == '/' || uri[j+3] == 0)) {
+            j += 3;
+            if (i <= 0) goto fail;
+            for(i--; i>=0 && nuri[i] != '/'; i--) ;
+            if (i < 0) goto fail;
+            i ++;
+        } else {
+            nuri[i++] = uri[j++];
+        }
+    }
+    if (i <= 0 || i >= sizeof(nuri) - 1) goto fail;
+    nuri[i] = 0;
+    
+    snprintf(path, sizeof(path), "%s%s", jj->fileServerRootDir, nuri);
+    path[sizeof(path)-1] = 0;
+    plen = strlen(path);
 
-	if (stat(path, &st) != 0) goto fail;
-	
-	if (S_ISDIR(st.st_mode) && plen < sizeof(path) - sizeof(JSVAR_INDEX_FILE_NAME) - 1) {
-		if (path[plen-1] != '/') path[plen++] = '/';
-		if (nuri[i-1] != '/') {
-			nuri[i++] = '/';
-			nuri[i] = 0;
-		}
-		strcpy(&path[plen], JSVAR_INDEX_FILE_NAME);
-		if (stat(path, &st) == 0) {
-			// index.html exists, load it
-			wsaioHttpSendFileAsync(ww, path, NULL);
-		} else {
-			// index.html doesn't exists
-			path[plen] = 0;
-			if (jj->fileServerListDirectories == 0) goto fail;
-			// load directory
-			wsaioHttpSendDirectory(ww, path, nuri, NULL);
-		}
-	} else {
-		// not a directory name, load file
-		// check for file existance
-		if (stat(path, &st) != 0) goto fail;
-		// return the file
-		wsaioHttpSendFileAsync(ww, path, NULL);
-	}
-	return(1);
+    if (stat(path, &st) != 0) goto fail;
+    
+    if (S_ISDIR(st.st_mode) && plen < sizeof(path) - sizeof(JSVAR_INDEX_FILE_NAME) - 1) {
+        if (path[plen-1] != '/') path[plen++] = '/';
+        if (nuri[i-1] != '/') {
+            nuri[i++] = '/';
+            nuri[i] = 0;
+        }
+        strcpy(&path[plen], JSVAR_INDEX_FILE_NAME);
+        if (stat(path, &st) == 0) {
+            // index.html exists, load it
+            wsaioHttpSendFileAsync(ww, path, NULL);
+        } else {
+            // index.html doesn't exists
+            path[plen] = 0;
+            if (jj->fileServerListDirectories == 0) goto fail;
+            // load directory
+            wsaioHttpSendDirectory(ww, path, nuri, NULL);
+        }
+    } else {
+        // not a directory name, load file
+        // check for file existance
+        if (stat(path, &st) != 0) goto fail;
+        // return the file
+        wsaioHttpSendFileAsync(ww, path, NULL);
+    }
+    return(1);
 
 fail:
-	wsaioHttpFinishAnswer(ww, "404 Not Found", "text/html", NULL);
-	return(-1);
+    wsaioHttpFinishAnswer(ww, "404 Not Found", "text/html", NULL);
+    return(-1);
 }
 
 int jsVarCallbackOnAcceptSinglePage(struct wsaio *ww) {
-	ww->b.userRuntimeType = JSVAR_CON_SINGLE_PAGE_WEBSERVER_CLIENT;
-	return(0);
+    ww->b.userRuntimeType = JSVAR_CON_SINGLE_PAGE_WEBSERVER_CLIENT;
+    return(0);
 }
 
 int jsVarCallbackOnAcceptFile(struct wsaio *ww) {
-	ww->b.userRuntimeType = JSVAR_CON_FILE_WEBSERVER_CLIENT;
-	return(0);
+    ww->b.userRuntimeType = JSVAR_CON_FILE_WEBSERVER_CLIENT;
+    return(0);
 }
 
 int jsVarCallbackOnWebsocketAccept(struct wsaio *ww) {
-	ww->b.userRuntimeType = JSVAR_CON_WEBSOCKET_SERVER_CLIENT;
-	return(0);
+    ww->b.userRuntimeType = JSVAR_CON_WEBSOCKET_SERVER_CLIENT;
+    return(0);
 }
 
 struct jsVaraio *jsVarNewSinglePageServer(int port, enum baioSslFlags sslFlag, int additionalSpaceToAllocate, char *body) {
     struct jsVaraio *jj;
     jj = jsVarNewServer(port, sslFlag, additionalSpaceToAllocate);
-	if (jj == NULL) return(NULL);
-	jj->w.b.userRuntimeType = JSVAR_CON_SINGLE_PAGE_WEBSERVER;
+    if (jj == NULL) return(NULL);
+    jj->w.b.userRuntimeType = JSVAR_CON_SINGLE_PAGE_WEBSERVER;
     jj->singlePageText = body;
     jsVarCallBackAddToHook(&jj->w.callBackOnWwwGetRequest, (void *) jsVarCallbackOnWwwGetRequestSinglePage);
-	jsVarCallBackAddToHook(&jj->w.callBackOnAccept, (void *) jsVarCallbackOnAcceptSinglePage);
-	jsVarCallBackAddToHook(&jj->w.callBackOnWebsocketAccept, (void *) jsVarCallbackOnWebsocketAccept);
+    jsVarCallBackAddToHook(&jj->w.callBackOnAccept, (void *) jsVarCallbackOnAcceptSinglePage);
+    jsVarCallBackAddToHook(&jj->w.callBackOnWebsocketAccept, (void *) jsVarCallbackOnWebsocketAccept);
     return(jj);
 }
 
 struct jsVaraio *jsVarNewFileServer(int port, enum baioSslFlags sslFlag, int additionalSpaceToAllocate, char *rootDirectory) {
     struct jsVaraio *jj;
     jj = jsVarNewServer(port, sslFlag, 0);
-	if (jj == NULL) return(NULL);
-	jj->w.b.userRuntimeType = JSVAR_CON_FILE_WEBSERVER;
+    if (jj == NULL) return(NULL);
+    jj->w.b.userRuntimeType = JSVAR_CON_FILE_WEBSERVER;
     jj->fileServerRootDir = rootDirectory;
-	jj->fileServerListDirectories = 1;
+    jj->fileServerListDirectories = 1;
     jsVarCallBackAddToHook(&jj->w.callBackOnWwwGetRequest, (void *) jsVarCallbackOnWwwGetRequestFile);
-	jsVarCallBackAddToHook(&jj->w.callBackOnAccept, (void *) jsVarCallbackOnAcceptFile);
-	jsVarCallBackAddToHook(&jj->w.callBackOnWebsocketAccept, (void *) jsVarCallbackOnWebsocketAccept);
+    jsVarCallBackAddToHook(&jj->w.callBackOnAccept, (void *) jsVarCallbackOnAcceptFile);
+    jsVarCallBackAddToHook(&jj->w.callBackOnWebsocketAccept, (void *) jsVarCallbackOnWebsocketAccept);
     return(jj);
 }
 
@@ -5590,23 +5590,23 @@ int jsVarSendData(struct jsVaraio *jj, char *data, int len) {
 }
 
 int jsVarIsActiveConnection(struct baio *bb, int userRuntimeType) {
-	if (bb == NULL) return(0);
-	if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return(0);
-	if (bb->userRuntimeType != userRuntimeType) return(0);
-	return(1);
+    if (bb == NULL) return(0);
+    if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return(0);
+    if (bb->userRuntimeType != userRuntimeType) return(0);
+    return(1);
 }
 
 int jsVarSendDataAll(char *data, int len) {
-	int 				i;
-    struct jsVaraio 	*jj;
-	
-	for(i=0; i<BAIO_MAX_CONNECTIONS; i++) {
-		// TODO: Keep list of all connected clients ?
-		if (jsVarIsActiveConnection(baioTab[i], JSVAR_CON_WEBSOCKET_SERVER_CLIENT)) {
+    int                 i;
+    struct jsVaraio     *jj;
+    
+    for(i=0; i<BAIO_MAX_CONNECTIONS; i++) {
+        // TODO: Keep list of all connected clients ?
+        if (jsVarIsActiveConnection(baioTab[i], JSVAR_CON_WEBSOCKET_SERVER_CLIENT)) {
             jj = (struct jsVaraio *) baioTab[i];
             jsVarSendData(jj, data, len);
         }
-	}
+    }
     return(len);
 }
 
@@ -5637,19 +5637,19 @@ void jsVarEvalAll(char *fmt, ...) {
     int             i;
     va_list         arg_ptr;
     
-	va_start(arg_ptr, fmt);
+    va_start(arg_ptr, fmt);
    
-	for(i=0; i<BAIO_MAX_CONNECTIONS; i++) {
-		// TODO: Keep list of all connected clients ?
-		if (jsVarIsActiveConnection(baioTab[i], JSVAR_CON_WEBSOCKET_SERVER_CLIENT)) {
-			// assert(baioMsgInProgress(baioTab[i]));
+    for(i=0; i<BAIO_MAX_CONNECTIONS; i++) {
+        // TODO: Keep list of all connected clients ?
+        if (jsVarIsActiveConnection(baioTab[i], JSVAR_CON_WEBSOCKET_SERVER_CLIENT)) {
+            // assert(baioMsgInProgress(baioTab[i]));
             // printf("sending\n");fflush(stdout);
             jj = (struct jsVaraio *) baioTab[i];
             jsVarVEval(jj, fmt, arg_ptr);
         }
-	}
+    }
 
-	va_end(arg_ptr);
+    va_end(arg_ptr);
 }
 
 #if JSVAR_USE_WCHAR_T
@@ -5659,17 +5659,17 @@ int jsVarVWEval(struct jsVaraio *jj, wchar_t *fmt, va_list arg_ptr) {
     struct jsVarDstr    *sss;
 
     ss = jsVarWDstrCreateByVPrintf(fmt, arg_ptr);
-	// jsVarWDstrAddCharacter(ss, 0);
-	sss = jsVarDstrCreate();
-	jsVarDstrExpandToSize(sss, (ss->size+1) * sizeof(wchar_t));
-	len = wcstombs(sss->s, ss->s, sss->allocatedSize);
-	if (len < 0) {
-		printf("%s: %s:%d: Error: wcstombs is unable to convert wchar_t to multibyte. Probably your 'locale' is not UTF-8 compatible.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
-	} else {
-		sss->size = len;
-		len = baioWriteToBuffer(&jj->w.b, sss->s, sss->size);
-		wsaioWebsocketCompleteMessage(&jj->w);
-	}
+    // jsVarWDstrAddCharacter(ss, 0);
+    sss = jsVarDstrCreate();
+    jsVarDstrExpandToSize(sss, (ss->size+1) * sizeof(wchar_t));
+    len = wcstombs(sss->s, ss->s, sss->allocatedSize);
+    if (len < 0) {
+        printf("%s: %s:%d: Error: wcstombs is unable to convert wchar_t to multibyte. Probably your 'locale' is not UTF-8 compatible.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
+    } else {
+        sss->size = len;
+        len = baioWriteToBuffer(&jj->w.b, sss->s, sss->size);
+        wsaioWebsocketCompleteMessage(&jj->w);
+    }
     jsVarDstrFree(&sss);
     jsVarWDstrFree(&ss);
     return(len);
@@ -5691,19 +5691,19 @@ void jsVarWEvalAll(wchar_t *fmt, ...) {
     int             i;
     va_list         arg_ptr;
     
-	va_start(arg_ptr, fmt);
+    va_start(arg_ptr, fmt);
    
-	for(i=0; i<BAIO_MAX_CONNECTIONS; i++) {
-		// TODO: Keep list of all connected clients ?
+    for(i=0; i<BAIO_MAX_CONNECTIONS; i++) {
+        // TODO: Keep list of all connected clients ?
         if (jsVarIsActiveConnection(baioTab[i], JSVAR_CON_WEBSOCKET_SERVER_CLIENT)) {
-			// assert(baioMsgInProgress(baioTab[i]));
+            // assert(baioMsgInProgress(baioTab[i]));
             // printf("sending\n");fflush(stdout);
             jj = (struct jsVaraio *) baioTab[i];
             jsVarVWEval(jj, fmt, arg_ptr);
         }
-	}
+    }
 
-	va_end(arg_ptr);
+    va_end(arg_ptr);
 }
 #endif
 
