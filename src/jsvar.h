@@ -8,19 +8,18 @@
 // In this part you can tune macros to your installation
 
 // Your memory allocator
-//#define JSVAR_ALLOC(p,t)                  {(p) = (t*) malloc(sizeof(t)); if((p)==NULL) {printf("bbo: Out of memory\n"); exit(1);}}
-//#define JSVAR_REALLOC(p,t)                {(p) = (t*) realloc((p), sizeof(t)); if((p)==NULL && (n)!=0) {printf("bbo: Out of memory\n"); exit(1);}}
-//#define JSVAR_ALLOCC(p,n,t)               {(p) = (t*) malloc((n)*sizeof(t)); if((p)==NULL && (n)!=0) {printf("bbo: Out of memory\n"); exit(1);}}
-//#define JSVAR_REALLOCC(p,n,t)             {(p) = (t*) realloc((p), (n)*sizeof(t)); if((p)==NULL && (n)!=0) {printf("bbo: Out of memory\n"); exit(1);}}
-//#define JSVAR_ALLOC_SIZE(p,t,n)           {(p) = (t*) malloc(n); if((p)==NULL && (n)!=0) {printf("bbo: Out of memory\n"); exit(1);}}
+//#define JSVAR_ALLOC(p,t)                  {(p) = (t*) malloc(sizeof(t)); if((p)==NULL) {printf("jsVar: Out of memory\n"); exit(1);}}
+//#define JSVAR_REALLOC(p,t)                {(p) = (t*) realloc((p), sizeof(t)); if((p)==NULL && (n)!=0) {printf("jsVar: Out of memory\n"); exit(1);}}
+//#define JSVAR_ALLOCC(p,n,t)               {(p) = (t*) malloc((n)*sizeof(t)); if((p)==NULL && (n)!=0) {printf("jsVar: Out of memory\n"); exit(1);}}
+//#define JSVAR_REALLOCC(p,n,t)             {(p) = (t*) realloc((p), (n)*sizeof(t)); if((p)==NULL && (n)!=0) {printf("jsVar: Out of memory\n"); exit(1);}}
+//#define JSVAR_ALLOC_SIZE(p,t,n)           {(p) = (t*) malloc(n); if((p)==NULL && (n)!=0) {printf("jsVar: Out of memory\n"); exit(1);}}
 //#define JSVAR_FREE(p)                     {free(p); }
 
 
 // Set to string which will prefix all jsvar printed messages (errors, warnings, debug)
 //#define JSVAR_PRINT_PREFIX()              "JsVar"
 
-// Uncomment to get access to functions to functions from dynamic strings, baio and wsaio libraries.
-// TODO: not yet implemented!
+// Uncomment to get access to functions from dynamic strings, baio and wsaio libraries.
 //#define JSVAR_ALL_LIBRARIES               1
 
 // Specify whether wchar_t functions are to be used

@@ -1,15 +1,8 @@
+//////////////////////////////////////////////////////////////////////////
+// jsVar version 0.7.1
 
 // exported debug level
 int jsVarDebugLevel = 0;
-
-//#include "jsvar.c"
-
-//////////////////////////////////////////////////////////////////////////
-// jsvar version 0.7
-// jsvar provides synchronization of C and Javascript (GUI) variables
-// (C) Xrefactory s.r.o.
-// (C) HUBECN LLC
-
 
 #if _WIN32
 
@@ -90,11 +83,11 @@ int jsVarDebugLevel = 0;
 
 // all memory allocation / freeing is going through the following macros
 #ifndef JSVAR_ALLOC
-#define JSVAR_ALLOC(p,t)            {(p) = (t*) malloc(sizeof(t)); if((p)==NULL) {printf("bbo: Out of memory\n"); assert(0); exit(1);}}
-#define JSVAR_REALLOC(p,t)          {(p) = (t*) realloc((p), sizeof(t)); if((p)==NULL && (n)!=0) {printf("bbo: Out of memory\n"); assert(0); exit(1);}}
-#define JSVAR_ALLOCC(p,n,t)         {(p) = (t*) malloc((n)*sizeof(t)); if((p)==NULL && (n)!=0) {printf("bbo: Out of memory\n"); assert(0); exit(1);}}
-#define JSVAR_REALLOCC(p,n,t)       {(p) = (t*) realloc((p), (n)*sizeof(t)); if((p)==NULL && (n)!=0) {printf("bbo: Out of memory\n"); assert(0); exit(1);}}
-#define JSVAR_ALLOC_SIZE(p,t,n)     {(p) = (t*) malloc(n); if((p)==NULL && (n)!=0) {printf("bbo: Out of memory\n"); assert(0); exit(1);}}
+#define JSVAR_ALLOC(p,t)            {(p) = (t*) malloc(sizeof(t)); if((p)==NULL) {printf("jsVar: Out of memory\n"); assert(0); exit(1);}}
+#define JSVAR_REALLOC(p,t)          {(p) = (t*) realloc((p), sizeof(t)); if((p)==NULL && (n)!=0) {printf("jsVar: Out of memory\n"); assert(0); exit(1);}}
+#define JSVAR_ALLOCC(p,n,t)         {(p) = (t*) malloc((n)*sizeof(t)); if((p)==NULL && (n)!=0) {printf("jsVar: Out of memory\n"); assert(0); exit(1);}}
+#define JSVAR_REALLOCC(p,n,t)       {(p) = (t*) realloc((p), (n)*sizeof(t)); if((p)==NULL && (n)!=0) {printf("jsVar: Out of memory\n"); assert(0); exit(1);}}
+#define JSVAR_ALLOC_SIZE(p,t,n)     {(p) = (t*) malloc(n); if((p)==NULL && (n)!=0) {printf("jsVar: Out of memory\n"); assert(0); exit(1);}}
 #define JSVAR_FREE(p)               {free(p); }
 #endif
 
@@ -1000,7 +993,7 @@ void jsVarCallBackRemoveFromHook(struct jsVarCallBackHook *h, void *ptr) {
     }
 }
 
-// if src is NULL, allocate new copy of src itself
+// if src is NULL, allocate new copy of dst itself
 JSVAR_STATIC void jsVarCallBackCloneHook(struct jsVarCallBackHook *dst, struct jsVarCallBackHook *src) {
     jsVarCallBackHookFunType *a;
 
