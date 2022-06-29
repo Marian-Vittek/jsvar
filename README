@@ -18,15 +18,15 @@ and C++ compilers.
 
 JsVar  is a  single-thread  application. It  is  perfectly suited  for
 professional use. It is extracted  from a production software. We have
-used it  in a brokerage server  for streaming prices.  Also  it can be
-usefull in education, embedded systems and anywhere where a web GUI is
-appropriate especially if server is  streaming live data.  In order to
-use jsVar  one has to  be familiar  with C and  Javascript programming
-languages.
+used it in a brokerage server for streaming prices.  It can be usefull
+in education,  embedded systems  and anywhere  where a  web GUI  is an
+appropriate option, especially  if server is streaming  live data.  In
+order  to use  jsVar one  has  to be  familiar with  C and  Javascript
+programming languages.
 
 
-Creation  of web  GUIs is  pretty simple  with JsVar,  here is  a full
-example from our sample set.
+Creation of  basic web GUIs is  pretty simple, here is  a full example
+from our sample set.
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -130,12 +130,12 @@ For the  moment the  documentation consists  of a  set of  very simple
 commented examples.  Examples are short  and easy to understand.  They
 demonstrate  the major  functions of  the library.   All examples  are
 simplified  to   maximum,  there  are   no  bells  and   whistles,  no
-overwhelming  safety  checks.  They  are  ment  to  demontrates  jsVar
+overwhelming  safety  checks.   They  are  ment  to  demontrate  jsVar
 features without  having any  meaning in  their own.   If there  is an
 interest in  this library I'll  prepare a deeper documentation  of all
 provided functionalities.
 
-The list of provided examples and features they demontrate:
+The list of examples:
 
 e1 - The simplest example showing current server time.
 e2 - Sending binary data through binary websocket messages
