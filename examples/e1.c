@@ -38,10 +38,10 @@ int main() {
         if (lastSentTime != time(NULL)) {
             // Time changed.
             lastSentTime = time(NULL);
-            // Send eval  request to all connected  clients. Note that
-            // we  send  eval  requests  only when  there  are  actual
-            // changes to be displayed. We do not send it at each pass
-            // of the loop, otherwise we risk overflow of buffers.
+            // Send eval  request to  all connected clients.   We send
+            // eval requests only when there  are actual changes to be
+            // displayed. We do not send it  at each pass of the loop,
+            // otherwise we risk overflow of buffers.
             jsVarEvalAll("document.getElementById('mainSpan').innerHTML = '%.20s';", ctime(&lastSentTime));
         }
         // Actually,  all previous  jsVar actions  were buffered.   To
