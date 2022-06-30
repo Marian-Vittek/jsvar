@@ -4,11 +4,11 @@ JsVar is a C library for  Linux/Unix systems allowing easy creation of
 web GUIs with websockets.
 
 JsVar provides compact and lightweight web and websocket servers. When
-a browser connects to JsVar server page a websocket connection is open
-and can be used for bidirectional communication between C code running
-on the server side and Javascript code running on the client (browser)
-side.   Data are  transmitted to  javascript immediately  after having
-been sent (PUSH method).
+a browser connects to JsVar a  websocket connection is open and can be
+used for  bidirectional communication  between C  code running  on the
+server side and Javascript code  running on the client (browser) side.
+Data are transmitted to javascript  immediately after having been sent
+(PUSH method).
 
 JsVar  can  be  used  to  provide both  plain  (unencrypted)  and  SSL
 connectivity.  It operates on both 'char*' and 'wchar_t*' strings.  It
@@ -18,7 +18,7 @@ and C++ compilers.
 
 JsVar  is a  single-thread  application. It  is  perfectly suited  for
 professional use. It is extracted  from a production software. We have
-used it in a brokerage server for streaming prices.  It can be usefull
+used it in a brokerage server  for streaming prices.  It can be useful
 in education,  embedded systems  and anywhere  where a  web GUI  is an
 appropriate option, especially  if server is streaming  live data.  In
 order  to use  jsVar one  has  to be  familiar with  C and  Javascript
@@ -87,8 +87,8 @@ int main() {
 DEPENDENCIES
 ^^^^^^^^^^^^
 
-If  you want  to use  SSL  you will  need Open-SSl  library.  You  can
-install it with the command:
+If you want to use SSL you will need OpenSSL library.  You can install
+it with the command:
 
   sudo apt-get install libssl-dev
 
@@ -113,9 +113,9 @@ browser and browse to the URL:
   https://localhost:4321
 
 
-Do similar  for other examples  (e2, e3,  etc.)  except of  "e8" which
+Do the  same for other examples  (e2, e3, etc.)  except  of "e8" which
 demonstrates the use of plain (non SSL) server and you have to connect
-to URL:
+to:
 
   http://localhost:4321
 
@@ -128,7 +128,7 @@ For the  moment the  documentation consists  of a  set of  very simple
 commented examples.  Examples are short  and easy to understand.  They
 demonstrate  the major  functions of  the library.   All examples  are
 simplified  to   maximum,  there  are   no  bells  and   whistles,  no
-overwhelming  safety  checks.   They  are  ment  to  demontrate  jsVar
+overwhelming  safety  checks.  They  are  meant  to demonstrate  jsVar
 features without  having any  meaning in  their own.   If there  is an
 interest in  this library I'll  prepare a deeper documentation  of all
 provided functionalities.
