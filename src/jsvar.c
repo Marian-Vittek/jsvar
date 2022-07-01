@@ -5044,10 +5044,10 @@ static void wsaioOnWsRead(struct wsaio *ww) {
             }
         }
 
-        if (opcode ==  WSAIO_WEBSOCKET_OP_CODE_TEXT) {
+        if (opcode == WSAIO_WEBSOCKET_OP_CODE_TEXT || opcode == WSAIO_WEBSOCKET_OP_CODE_BIN) {
             r = 0;
             // JSVAR_CALLBACK_CALL(ww->callBackOnWebsocketGetMessage, (r = callBack(ww, bb->readBuffer.i+(payload-msgStart), payloadLen)));
-            JSVAR_CALLBACK_CALL(ww->callBackOnWebsocketGetMessage, (r = callBack(ww, (char*)payload - bb->readBuffer.b, payloadLen)));
+            JSVAR_CALLBACK_CALL(ww->callBackOnWebsocketGetMessage, (r = callBack(ww, (char*)payload, payloadLen)));
         } else if (opcode == WSAIO_WEBSOCKET_OP_CODE_CLOSED) {
             if (jsVarDebugLevel > 0) printf("%s: Websocket connection closed by remote host.\n", JSVAR_PRINT_PREFIX());
             baioClose(bb);
@@ -5137,7 +5137,6 @@ static int wsaioOnBaioDelete(struct baio *bb) {
     jsVarCallBackFreeHook(&ww->callBackOnWwwPostRequest);
     jsVarCallBackFreeHook(&ww->callBackOnWebsocketAccept);
     jsVarCallBackFreeHook(&ww->callBackOnWebsocketGetMessage);
-    jsVarCallBackFreeHook(&ww->callBackOnWebsocketSend);
     jsVarCallBackFreeHook(&ww->callBackOnDelete);
 
     return(0);
@@ -5172,7 +5171,6 @@ static int wsaioOnBaioTcpIpAccept(struct baio *bb) {
     jsVarCallBackCloneHook(&ww->callBackOnWwwPostRequest, NULL);
     jsVarCallBackCloneHook(&ww->callBackOnWebsocketAccept, NULL);
     jsVarCallBackCloneHook(&ww->callBackOnWebsocketGetMessage, NULL);
-    jsVarCallBackCloneHook(&ww->callBackOnWebsocketSend, NULL);
     jsVarCallBackCloneHook(&ww->callBackOnDelete, NULL);
 
     JSVAR_CALLBACK_CALL(ww->callBackOnTcpIpAccept, callBack(ww));

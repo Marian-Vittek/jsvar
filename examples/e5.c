@@ -21,7 +21,8 @@ int main() {
     struct jsVaraio *js;
     time_t          lastSentTime;
     
-    // Create new web/websocket server having "./e5www" as its root directory.
+    // Create new  web/websocket server  having "./e5www" as  its root
+    // directory.
     js = jsVarNewFileServer(4321, BAIO_SSL_YES, 0, "./e5www");
 
     lastSentTime = 0;

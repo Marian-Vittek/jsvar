@@ -38,17 +38,13 @@ struct kitchenTimeraio {
     int             timerInitValue;
 };
 
-int kitchenTimerWebsocketCallback(struct jsVaraio *js, int i, int msglen) {
+int kitchenTimerWebsocketCallback(struct jsVaraio *js, char *msg, int msglen) {
     struct kitchenTimeraio *pp;
-    char *msg;
 
     // we can safely convert to our structure because we have reserved
     // space for it when creating server
     pp = (struct kitchenTimeraio *) js;
     
-    // this is the place where the incoming message starts
-    msg = js->w.b.readBuffer.b+i;
-
     // process the incoming message
     // printf("Got message: %s\n", msg);
     if (strncmp(msg, "login=", 6) == 0) {
@@ -88,8 +84,6 @@ int kitchenTimerWebsocketCallback(struct jsVaraio *js, int i, int msglen) {
         pp->timerInitValue = atoi(msg+5);
     }
 
-    // if processed, you have to "consume" the message from the input buffer
-    js->w.b.readBuffer.i += msglen;
     return(1);
 }
 

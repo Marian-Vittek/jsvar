@@ -323,8 +323,7 @@ struct wsaio {
     int                     (*callBackOnAccept)(struct wsaio *ww);
     int                     (*callBackOnWwwGetRequest)(struct wsaio *ww, char *uri);
     int                     (*callBackOnWebsocketAccept)(struct wsaio *ww, char *uri);
-    int                     (*callBackOnWebsocketGetMessage)(struct wsaio *ww, int fromj, int n);
-    int                     (*callBackOnWebsocketSend)(struct wsaio *ww, int fromi, int n);
+    int                     (*callBackOnWebsocketGetMessage)(struct wsaio *ww, char *msg, int n);
     int                     (*callBackOnDelete)(struct wsaio *ww);
 #endif
 
@@ -335,7 +334,6 @@ struct wsaio {
     struct jsVarCallBackHook    callBackOnWwwPostRequest;
     struct jsVarCallBackHook    callBackOnWebsocketAccept;
     struct jsVarCallBackHook    callBackOnWebsocketGetMessage;
-    struct jsVarCallBackHook    callBackOnWebsocketSend;
     struct jsVarCallBackHook    callBackOnDelete;
 
     // parsed current request

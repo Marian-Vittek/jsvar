@@ -25,11 +25,7 @@ time_t          lastRefreshTime;
 int             timer;
 int             timerInitValue = 10;
 
-int kitchenTimerWebsocketCallback(struct jsVaraio *js, int i, int msglen) {
-    char *msg;
-
-    // this is the place where the incoming message starts
-    msg = js->w.b.readBuffer.b+i;
+int kitchenTimerWebsocketCallback(struct jsVaraio *js, char *msg, int msglen) {
 
     // process the incoming message
     printf("Got message: %s\n", msg);
@@ -47,8 +43,6 @@ int kitchenTimerWebsocketCallback(struct jsVaraio *js, int i, int msglen) {
         timerInitValue = atoi(msg+5);
     }
 
-    // if processed, you have to "consume" the message from the input buffer
-    js->w.b.readBuffer.i += msglen;
     return(1);
 }
 
