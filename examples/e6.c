@@ -49,7 +49,10 @@ int myGetCallback(struct wsaio *ww, char *uri) {
             );
         wsaioHttpFinishAnswer(ww, "200 OK", "text/html", NULL);     
     } else {
-        wsaioHttpFinishAnswer(ww, "404 Not Found", "text/html", NULL);
+		// not my page, execute other callbacks on the hook
+		return(0);
+		// alternatively, you can answer that no such page exists.
+        // wsaioHttpFinishAnswer(ww, "404 Not Found", "text/html", NULL);
     }
     
     // returning non-zero value means we took care and answered this URI request
