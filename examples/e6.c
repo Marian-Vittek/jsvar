@@ -66,7 +66,7 @@ int main() {
     
     // Create new  web/websocket server, no  need to specify  the page
     // here. It will captured in URL callback.
-    js = jsVarNewSinglePageServer(4321, BAIO_SSL_YES, 0, NULL);
+    js = jsVarNewSinglePageServer(4321, BAIO_SSL_YES, 0, "Not found.");
 
     jsVarCallBackAddToHook(&js->w.callBackOnWwwGetRequest, myGetCallback);
     
