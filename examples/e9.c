@@ -2,19 +2,16 @@
 //
 // This  is  a more  complex  example  demonstrating  one way  how  to
 // implement web sites with login and personalized pages. This program
-// provides a simple "Kitchen Timer"  as one of previous examples with
-// the  difference that  this one  can be  used by  multiple connected
-// users having each their own timer.
+// provides a  simple "Kitchen  Timer" which can  be used  by multiple
+// connected users having each their own timer.
 //
 // This  example uses  function  "jsVarEval" which  allows  to eval  a
 // string on a specific client  (compared to jsVarEvalAll sending eval
 // request to all connected clients).
 //
-// When creating web server we have also required that each connection
-// structure which is  used internally by jsvar and  sent to callbacks
-// has  an additional  space allocated  to be  able to  store our  own
-// connection   specific  variables   as   defined   in  our   "struct
-// kitchenTimeraio".
+// When  creating web  server we  require that  each jsvar  connection
+// structure has an additional space  allocated where we store our own
+// specific variables as defined in our "struct kitchenTimeraio".
 //
 // URL: https://localhost:4321
 //
