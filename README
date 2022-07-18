@@ -22,7 +22,7 @@ live data.   JsVar is  a single-thread  application.  It  is perfectly
 suited for embedded systems and  professional use.  Originally, it was
 developed for a  brokerage server streaming prices,  I've extracted it
 from the  production version of that  software. In order to  use jsVar
-one has to be familiar with C and Javascript programming languages.
+one has to be familiar with HTML and Javascript programming language.
 
 
 Creation of  basic web GUIs is  pretty simple, here is  a full example
@@ -64,13 +64,15 @@ int main() {
         if (lastSentTime != time(NULL)) {
             // Time changed.
             lastSentTime = time(NULL);
-            // Send eval  request to  all connected clients.
+            // Send eval request to all connected clients. jsVarEvalAll
+            // has a variable number arguments with the same meaning as
+            // printf.
             jsVarEvalAll("document.getElementById('mainSpan').innerHTML = '%.20s';", ctime(&lastSentTime));
         }
         // Actually,  all previous  jsVar actions  were buffered.   To
         // perform real  I/O operations  one have to  call "baioPoll".
         // It shall be  called as often as possible.   It never blocks
-        // execution on I/O. If there is no I/O to do, baioPoll  waits
+        // execution on I/O. If there is no I/O to do  baioPoll  waits
         // until timeout, in this case 100000us aka 100ms.
         baioPoll(100000);
     }

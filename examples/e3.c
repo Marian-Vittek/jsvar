@@ -1,7 +1,14 @@
 //////////////////////////////////////////////////////////////////////
 //
 // This program demonstrates howto  install your SSL certificates. The
-// program itself is the initial example showing server time.
+// program itself is the initial  example showing server time.  An SSL
+// server requires two  things: a private key and  a certificate.  You
+// can either specify then directly  (as string) or specify files from
+// where they  will be read.   This program demonstrates both  way, if
+// the  macro  READ_CERTIFICATE_FROM_FILE  is  defined,  this  program
+// specifies files to  be read, if not, it  uses certificates assigned
+// to string variables.
+
 //
 // URL: https://localhost:4321
 //
@@ -16,8 +23,8 @@ int main() {
     struct jsVaraio *js;
     time_t          lastSentTime;
 
-    // Custom SSL private key and  certificate has to specified BEFORE
-    // the first invocation of jsvar.
+    // Custom  SSL private  key and  certificate has  to be  specified
+    // BEFORE the first invocation of jsvar!
 
 #if READ_CERTIFICATE_FROM_FILE
 

@@ -29,8 +29,11 @@ int main() {
     int             i, len;
     time_t          currentTime, lastSentTime;
     
-    // Create new web/websocket server showing the following html page on each request
-    // An "active" pages must include the script "/jsvarmainjavascript.js"!
+    // Create new web/websocket server showing the following html page
+    // on each request. We define a javascript function translating an
+    // arraybuffer to  base64, this  is not necessary  for transfering
+    // binary  data,  however  the  function is  used  later  to  show
+    // received picture.
     js = jsVarNewSinglePageServer(
         4321, BAIO_SSL_YES, 0,
         "<html><body><script src='/jsvarmainjavascript.js'></script>"
@@ -46,6 +49,7 @@ int main() {
         "}"
         "</script>"
         "Picture Size <span id=size></span> bytes.<br>"
+        // the actual tag where the picture is shown
         "<img id=picdiv style='width:460px;hight:340px;'></img>"
         "</body></html>"
         );
@@ -53,22 +57,28 @@ int main() {
     i = 0;
     for(;;) {
         currentTime = time(NULL);
+        // send new picture every two seconds
         if (currentTime != lastSentTime && currentTime % 2 == 0) {
+            // file name of the "current" picture
             sprintf(picname, "pic-%02d.jpg", i);
             if (stat(picname, &st) != 0) {
+                // file does not exist, rewind to first picture
                 i = 0;
                 continue;
             } else {
+                // file exists
                 lastSentTime = currentTime;
+                // open the file 
                 ff = fopen(picname, "rb");
                 if (ff != NULL) {
                     len = st.st_size;
                     p = malloc(len);
                     if (p != NULL) {
+                        // read the picture
                         fread(p, len, 1, ff);
-                        // jsVarEvalAll("jsvar.debuglevel = 9999;");
-                        // printf("sending %s: %d bytes\n", picname, len);
+                        // send the picture to all connected clients
                         jsVarSendDataAll(p, len);
+                        // retrieve/show the picture on the javascript side and show the file size
                         jsVarEvalAll("document.getElementById('picdiv').src='data:image/jpg;base64,' + arrayBufferToBase64(jsvar.data);");
                         jsVarEvalAll("document.getElementById('size').innerHTML='%d';", len);
                         free(p);
