@@ -998,9 +998,11 @@ JSVAR_STATIC void jsVarCallBackCloneHook(struct jsVarCallBackHook *dst, struct j
     jsVarCallBackHookFunType *a;
 
     if (src != NULL) *dst = *src;
-    a = dst->a;
-    JSVAR_ALLOCC(dst->a, dst->dim, jsVarCallBackHookFunType);
-    memcpy(dst->a, a, dst->dim*sizeof(jsVarCallBackHookFunType));
+    if (dst->dim != 0) {
+        a = dst->a;
+        JSVAR_ALLOCC(dst->a, dst->dim, jsVarCallBackHookFunType);
+        memcpy(dst->a, a, dst->dim*sizeof(jsVarCallBackHookFunType));
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1152,7 +1154,7 @@ JSVAR_STATIC int jsVarSetFileNonBlocking(int fd) {
 #if _WIN32
     return(-1);
 #else
-    unsigned    flg;
+    int    flg;
     // Set non-blocking 
     if((flg = fcntl(fd, F_GETFL, NULL)) < 0) { 
         printf("%s: %s:%d: Error on socket %d fcntl(..., F_GETFL) (%s)\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, fd, strerror(errno)); 
@@ -2405,7 +2407,10 @@ int baioVprintfToBuffer(struct baio *bb, char *fmt, va_list arg_ptr) {
 
     b = &bb->writeBuffer;
     dsize = baioSizeOfContinuousFreeSpaceForWrite(b);
-    if (dsize < 0) dsize = 0;
+    if (dsize <= 0) {
+        dsize = 0;
+        if (b->b == NULL) baioGetSpaceForWrite(bb, 1);
+    }
     va_copy(arg_ptr_copy, arg_ptr);
     n = vsnprintf(b->b + b->j, dsize, fmt, arg_ptr_copy);
 #if _WIN32

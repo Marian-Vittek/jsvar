@@ -206,7 +206,7 @@ typedef int (*jsVarCallBackHookFunType)(void *x, ...);
 
 struct jsVarCallBackHook {
     jsVarCallBackHookFunType    *a;
-    int                     i, dim;
+    int                     	i, dim;
 };
 
 struct baio {

@@ -65,8 +65,8 @@ int main() {
             // Time changed.
             lastSentTime = time(NULL);
             // Send eval request to all connected clients. jsVarEvalAll
-            // has a variable number arguments with the same meaning as
-            // printf.
+            // has variable number of  arguments with the same  meaning
+            // as printf.
             jsVarEvalAll("document.getElementById('mainSpan').innerHTML = '%.20s';", ctime(&lastSentTime));
         }
         // Actually,  all previous  jsVar actions  were buffered.   To

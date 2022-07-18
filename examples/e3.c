@@ -3,7 +3,7 @@
 // This program demonstrates howto  install your SSL certificates. The
 // program itself is the initial  example showing server time.  An SSL
 // server requires two  things: a private key and  a certificate.  You
-// can either specify then directly  (as string) or specify files from
+// can either specify them directly  (as string) or specify files from
 // where they  will be read.   This program demonstrates both  way, if
 // the  macro  READ_CERTIFICATE_FROM_FILE  is  defined,  this  program
 // specifies files to  be read, if not, it  uses certificates assigned

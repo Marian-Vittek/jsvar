@@ -62,9 +62,8 @@ int main() {
             // file name of the "current" picture
             sprintf(picname, "pic-%02d.jpg", i);
             if (stat(picname, &st) != 0) {
-                // file does not exist, rewind to first picture
+                // file does not exist, rewind to the first picture
                 i = 0;
-                continue;
             } else {
                 // file exists
                 lastSentTime = currentTime;
