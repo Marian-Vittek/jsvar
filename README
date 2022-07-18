@@ -16,13 +16,13 @@ allows to send both binary and  text websocket messages. It is written
 in a common  subsets of C and  C++ languages and compiles  with both C
 and C++ compilers.
 
-JsVar  is a  single-thread  application. It  is  perfectly suited  for
-professional use. It is extracted  from a production software. We have
-used it in a brokerage server  for streaming prices.  It can be useful
-in education,  embedded systems  and anywhere  where a  web GUI  is an
-appropriate option, especially  if server is streaming  live data.  In
-order  to use  jsVar one  has  to be  familiar with  C and  Javascript
-programming languages.
+JsVar can be useful in  education, embedded systems and anywhere where
+a web GUI is an appropriate  option, especially if server is streaming
+live data.   JsVar is  a single-thread  application.  It  is perfectly
+suited for embedded systems and  professional use.  Originally, it was
+developed for a  brokerage server streaming prices,  I've extracted it
+from the  production version of that  software. In order to  use jsVar
+one has to be familiar with C and Javascript programming languages.
 
 
 Creation of  basic web GUIs is  pretty simple, here is  a full example
@@ -45,13 +45,12 @@ from our sample set.
 #include "jsvar.h"
 
 int main() {
-    struct jsVaraio *js;
     time_t          lastSentTime;
     
     // Create new web/websocket server showing the following html page
     // on each  request.  Note that "active" pages include  the script
     // "/jsvarmainjavascript.js"!
-    js = jsVarNewSinglePageServer(
+    jsVarNewSinglePageServer(
         4321, BAIO_SSL_YES, 0,
         "<html><body><script src='/jsvarmainjavascript.js'></script>"
         "Server Time: <span id=mainSpan>nothing here for now</span>"
@@ -70,9 +69,9 @@ int main() {
         }
         // Actually,  all previous  jsVar actions  were buffered.   To
         // perform real  I/O operations  one have to  call "baioPoll".
-        // It shall be  called as often as possible.  If  there are no
-        // I/O  to  do, baioPoll  waits  until  timeout, in  this case
-        // 100000us aka 100ms.
+        // It shall be  called as often as possible.   It never blocks
+        // execution on I/O. If there is no I/O to do, baioPoll  waits
+        // until timeout, in this case 100000us aka 100ms.
         baioPoll(100000);
     }
 }
