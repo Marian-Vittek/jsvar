@@ -3203,8 +3203,8 @@ struct baio *baioNewFile(char *path, int ioDirection, int additionalSpaceToAlloc
     if (path == NULL) return(NULL);
 
     if (ioDirection == BAIO_IO_DIRECTION_READ) flags = (O_RDONLY);
-    else if (ioDirection == BAIO_IO_DIRECTION_WRITE) flags = (O_WRONLY | O_CREAT);
-    else if (ioDirection == BAIO_IO_DIRECTION_RW) flags = (O_RDWR | O_CREAT);
+    else if (ioDirection == BAIO_IO_DIRECTION_WRITE) flags = (O_WRONLY | O_CREAT | O_TRUNC);
+    else if (ioDirection == BAIO_IO_DIRECTION_RW) flags = (O_RDWR | O_CREAT | O_TRUNC);
     else {
         printf("%s:%s:%d: Invalid ioDirection\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
         return(NULL);
@@ -5309,7 +5309,7 @@ double jsVarGetEnvDouble(char *env, char *key, double defaultValue) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// Javasctript part of the communication.
+// Javascript part of the communication.
 // It shall be included into each HTML page using jsvar
 
 static char *jsVarMainJavascript = JSVAR_STRINGIFY(
@@ -5566,7 +5566,7 @@ struct jsVaraio *jsVarNewSinglePageServer(int port, enum baioSslFlags sslFlag, i
     jj = jsVarNewServer(port, sslFlag, additionalSpaceToAllocate);
     if (jj == NULL) return(NULL);
     jj->w.b.userRuntimeType = JSVAR_CON_SINGLE_PAGE_WEBSERVER;
-    jj->singlePageText = body;
+    jj->singlePageText = jsvarStrDuplicate(body);
     jsVarCallBackAddToHook(&jj->w.callBackOnWwwGetRequest, (void *) jsVarCallbackOnWwwGetRequestSinglePage);
     jsVarCallBackAddToHook(&jj->w.callBackOnAccept, (void *) jsVarCallbackOnAcceptSinglePage);
     jsVarCallBackAddToHook(&jj->w.callBackOnWebsocketAccept, (void *) jsVarCallbackOnWebsocketAccept);
@@ -5575,10 +5575,10 @@ struct jsVaraio *jsVarNewSinglePageServer(int port, enum baioSslFlags sslFlag, i
 
 struct jsVaraio *jsVarNewFileServer(int port, enum baioSslFlags sslFlag, int additionalSpaceToAllocate, char *rootDirectory) {
     struct jsVaraio *jj;
-    jj = jsVarNewServer(port, sslFlag, 0);
+    jj = jsVarNewServer(port, sslFlag, additionalSpaceToAllocate);
     if (jj == NULL) return(NULL);
     jj->w.b.userRuntimeType = JSVAR_CON_FILE_WEBSERVER;
-    jj->fileServerRootDir = rootDirectory;
+    jj->fileServerRootDir = jsvarStrDuplicate(rootDirectory);
     jj->fileServerListDirectories = 1;
     jsVarCallBackAddToHook(&jj->w.callBackOnWwwGetRequest, (void *) jsVarCallbackOnWwwGetRequestFile);
     jsVarCallBackAddToHook(&jj->w.callBackOnAccept, (void *) jsVarCallbackOnAcceptFile);

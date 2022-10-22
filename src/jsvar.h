@@ -443,14 +443,14 @@ int base64_decode(char *data, int input_length, char *decoded_data, int output_l
 extern struct baio *baioTab[BAIO_MAX_CONNECTIONS];
 extern int      baioTabMax;
 struct baio *baioFromMagic(int baioMagic) ;
-struct baio *baioNewBasic(int baioType, int ioDirections, int additionalSpaceToAllocate) ;
-struct baio *baioNewFile(char *path, int ioDirection, int additionalSpaceToAllocate) ;
-struct baio *baioNewPseudoFile(char *string, int stringLength, int additionalSpaceToAllocate) ;
-struct baio *baioNewPipedFile(char *path, int ioDirection, int additionalSpaceToAllocate) ;
-struct baio *baioNewSocketFile(char *path, int ioDirection, int additionalSpaceToAllocate) ;
-struct baio *baioNewPipedCommand(char *command, int ioDirection, int additionalSpaceToAllocate) ;
-struct baio *baioNewTcpipClient(char *hostName, int port, enum baioSslFlags sslFlag, int additionalSpaceToAllocate) ;
-struct baio *baioNewTcpipServer(int port, enum baioSslFlags sslFlag, int additionalSpaceToAllocate) ;
+struct baio *baioNewBasic(int baioType, int ioDirections, int spaceToAllocate) ;
+struct baio *baioNewFile(char *path, int ioDirection, int spaceToAllocate) ;
+struct baio *baioNewPseudoFile(char *string, int stringLength, int spaceToAllocate) ;
+struct baio *baioNewPipedFile(char *path, int ioDirection, int spaceToAllocate) ;
+struct baio *baioNewSocketFile(char *path, int ioDirection, int spaceToAllocate) ;
+struct baio *baioNewPipedCommand(char *command, int ioDirection, int spaceToAllocate) ;
+struct baio *baioNewTcpipClient(char *hostName, int port, enum baioSslFlags sslFlag, int spaceToAllocate) ;
+struct baio *baioNewTcpipServer(int port, enum baioSslFlags sslFlag, int spaceToAllocate) ;
 int baioLibraryInit(int deInitializationFlag) ;
 int baioSslLibraryInit() ;
 int baioReadBufferResize(struct baioReadBuffer *b, int minSize, int maxSize) ;
@@ -489,8 +489,8 @@ int baioCloseOnError(struct baio *bb);
 int baioSelect(int maxfd, fd_set *r, fd_set *w, fd_set *e, struct timeval *t) ;
 
 // wsaio
-struct wsaio *wsaioNewServer(int port, enum baioSslFlags sslFlag, int additionalSpaceToAllocate) ;
-struct wsaio *wsaioNewWebsocketClient(char *hostName, int port, char *pathAndQuery, char *sheaders, enum baioSslFlags sslFlag, int additionalSpaceToAllocate) ;
+struct wsaio *wsaioNewServer(int port, enum baioSslFlags sslFlag, int spaceToAllocate) ;
+struct wsaio *wsaioNewWebsocketClient(char *hostName, int port, char *pathAndQuery, char *sheaders, enum baioSslFlags sslFlag, int spaceToAllocate) ;
 char *wsaioGetFileMimeType(char *fname) ;
 void wsaioHttpStartNewAnswer(struct wsaio *ww) ;
 void wsaioHttpFinishAnswer(struct wsaio *ww, char *statusCodeAndDescription, char *contentType, char *additionalHeaders) ;
@@ -533,8 +533,8 @@ int jsVarCallBackAddToHook(struct jsVarCallBackHook *h, void *ptr) ;
 void jsVarCallBackRemoveFromHook(struct jsVarCallBackHook *h, void *ptr) ;
 
 
-struct jsVaraio *jsVarNewSinglePageServer(int port, enum baioSslFlags sslFlag, int additionalSpaceToAllocate, char *body) ;
-struct jsVaraio *jsVarNewFileServer(int port, enum baioSslFlags sslFlag, int additionalSpaceToAllocate, char *rootDirectory) ;
+struct jsVaraio *jsVarNewSinglePageServer(int port, enum baioSslFlags sslFlag, int spaceToAllocate, char *body) ;
+struct jsVaraio *jsVarNewFileServer(int port, enum baioSslFlags sslFlag, int spaceToAllocate, char *rootDirectory) ;
 int jsVarIsActiveConnection(struct baio *bb, int userRuntimeType);
 int jsVarSendData(struct jsVaraio *jj, char *data, int len) ;
 int jsVarSendDataAll(char *data, int len) ;

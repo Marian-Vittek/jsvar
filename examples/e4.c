@@ -54,7 +54,7 @@ int main() {
         4321, BAIO_SSL_YES, 0,
         "<html><body><script src='/jsvarmainjavascript.js'></script>"
         "<h2>Kitchen Timer</h2>"
-        "Current Data/Time: <span id=mainSpan></span>"
+        "Current Date/Time: <span id=mainSpan></span>"
         "<h3>Timer: <span id=timer></span></h3>"
         "<pre id=ring>&nbsp;</pre>"
         "<br>Starting value: <input type=number value='10' onchange='jsvar.callback(\"sval=\"+this.value);' /> &emsp; "     
