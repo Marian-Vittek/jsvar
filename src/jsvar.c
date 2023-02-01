@@ -128,19 +128,19 @@ int jsVarDebugLevel = 0;
 #define JSVAR_MAX(x,y)                      ((x)<(y) ? (y) : (x))
 
 
-#define JsVarInternalCheck(x) {                                             \
+#define JsVarInternalCheck(x) {                                         \
         if (! (x)) {                                                    \
             printf("%s: Error: Internal check %s failed at %s:%d\n", JSVAR_PRINT_PREFIX(), #x, __FILE__, __LINE__); \
             fflush(stdout); abort();                                    \
         }                                                               \
     }
 
-#define JSVAR_CALLBACK_CALL(hook, command) {\
-        int _i_; \
-        for(_i_=(hook).i-1; _i_ >= 0; _i_--) {\
+#define JSVAR_CALLBACK_CALL(hook, command) {    \
+        int _i_;                                \
+        for(_i_=(hook).i-1; _i_ >= 0; _i_--) {                 \
             jsVarCallBackHookFunType callBack = (hook).a[_i_]; \
-            if (command) break;\
-        }\
+            if (command) break;                                \
+        }                                                      \
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,13 +193,13 @@ static int intDigitToHexChar(int x) {
 // base64 (Those two function are public domain software)
 
 static unsigned char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-                                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-                                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-                                'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-                                'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-                                'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-                                'w', 'x', 'y', 'z', '0', '1', '2', '3',
-                                '4', '5', '6', '7', '8', '9', '+', '/'};
+    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+    'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+    'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+    'w', 'x', 'y', 'z', '0', '1', '2', '3',
+    '4', '5', '6', '7', '8', '9', '+', '/'};
 static unsigned char *decoding_table = NULL;
 static int mod_table[] = {0, 2, 1};
 
@@ -219,29 +219,29 @@ JSVAR_STATIC void jsVarBase64Cleanup() {
 JSVAR_STATIC int jsVarBase64Encode(char *data, int input_length, char *encoded_data, int output_length) {
     int             i, j, olen;
     unsigned char   *d;
-
+    
     d = (unsigned char *) data;
-
+    
     olen = 4 * ((input_length + 2) / 3);
     if (olen >= output_length) return(-1);
-
+    
     for (i = 0, j = 0; i < input_length;) {
-
+        
         uint32_t octet_a = i < input_length ? d[i++] : 0;
         uint32_t octet_b = i < input_length ? d[i++] : 0;
         uint32_t octet_c = i < input_length ? d[i++] : 0;
-
+        
         uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
-
+        
         encoded_data[j++] = encoding_table[(triple >> 3 * 6) & 0x3F];
         encoded_data[j++] = encoding_table[(triple >> 2 * 6) & 0x3F];
         encoded_data[j++] = encoding_table[(triple >> 1 * 6) & 0x3F];
         encoded_data[j++] = encoding_table[(triple >> 0 * 6) & 0x3F];
     }
-
+    
     for (i = 0; i < mod_table[input_length % 3]; i++)
         encoded_data[olen - 1 - i] = '=';
-
+    
     encoded_data[olen] = 0;
     return(olen);
 }
@@ -250,30 +250,30 @@ JSVAR_STATIC int jsVarBase64Encode(char *data, int input_length, char *encoded_d
 JSVAR_STATIC int jsVarBase64Decode(char *data, int input_length, char *decoded_data, int output_length) {
     int             i, j, olen;
     unsigned char   *d;
-
+    
     d = (unsigned char *) data;
     if (decoding_table == NULL) jsVarBuildDecodingTable();
-
+    
     if (input_length % 4 != 0) return(-1);
-
+    
     olen = input_length / 4 * 3;
     if (d[input_length - 1] == '=') olen--;
     if (d[input_length - 2] == '=') olen--;
-
+    
     if (olen > output_length) return(-1);
-
+    
     for (i = 0, j = 0; i < input_length;) {
-
+        
         uint32_t sextet_a = d[i] == '=' ? 0 & i++ : decoding_table[d[i++]];
         uint32_t sextet_b = d[i] == '=' ? 0 & i++ : decoding_table[d[i++]];
         uint32_t sextet_c = d[i] == '=' ? 0 & i++ : decoding_table[d[i++]];
         uint32_t sextet_d = d[i] == '=' ? 0 & i++ : decoding_table[d[i++]];
-
+        
         uint32_t triple = (sextet_a << 3 * 6)
-        + (sextet_b << 2 * 6)
-        + (sextet_c << 1 * 6)
-        + (sextet_d << 0 * 6);
-
+            + (sextet_b << 2 * 6)
+            + (sextet_c << 1 * 6)
+            + (sextet_d << 0 * 6);
+        
         if (j < olen) decoded_data[j++] = (triple >> 2 * 8) & 0xFF;
         if (j < olen) decoded_data[j++] = (triple >> 1 * 8) & 0xFF;
         if (j < olen) decoded_data[j++] = (triple >> 0 * 8) & 0xFF;
@@ -402,7 +402,7 @@ JSVAR_STATIC int jsVarDstrAppendVPrintf(struct jsVarDstr *s, char *fmt, va_list 
     int         n, dsize;
     char        *d;
     va_list     arg_ptr_copy;
-
+    
     n = 0;
     for(;;) {
         d = s->s+s->size;
@@ -432,7 +432,7 @@ JSVAR_STATIC int jsVarDstrAppendVPrintf(struct jsVarDstr *s, char *fmt, va_list 
 JSVAR_STATIC int jsVarDstrAppendPrintf(struct jsVarDstr *s, char *fmt, ...) {
     int             res;
     va_list         arg_ptr;
-
+    
     va_start(arg_ptr, fmt);
     res = jsVarDstrAppendVPrintf(s, fmt, arg_ptr);
     va_end(arg_ptr);
@@ -454,10 +454,10 @@ JSVAR_STATIC int jsVarDstrAppendEscapedStringUsableInJavascriptEval(struct jsVar
 
 JSVAR_STATIC int jsVarDstrAppendBase64EncodedData(struct jsVarDstr *ss, char *s, int slen) {
     int                         i, c, r;
-
+    
     if (slen < 0) return(-1);
     if (slen == 0) return(0);
-
+    
     jsVarDstrExpandToSize(ss, ss->size + slen*4/3 + 2);
     r = jsVarBase64Encode(s, slen, ss->s+ss->size, ss->allocatedSize-ss->size);
     if (r < 0) {
@@ -472,10 +472,10 @@ JSVAR_STATIC int jsVarDstrAppendBase64EncodedData(struct jsVarDstr *ss, char *s,
 
 JSVAR_STATIC int jsVarDstrAppendBase64DecodedData(struct jsVarDstr *ss, char *s, int slen) {
     int                         i, c, r;
-
+    
     if (slen < 0) return(-1);
     if (slen == 0) return(0);
-
+    
     jsVarDstrExpandToSize(ss, ss->size + slen / 4 * 3);
     r = jsVarBase64Decode(s, slen, ss->s+ss->size, ss->allocatedSize-ss->size);
     if (r < 0) {
@@ -498,7 +498,7 @@ JSVAR_STATIC int jsVarDstrReplace(struct jsVarDstr *s, char *str, char *byStr, i
     struct jsVarDstr    *d;
     int                 i, slen, stlen;
     char                *ss, *cc;
-
+    
     stlen = strlen(str);
     slen = s->size;
     ss = jsVarDstrGetStringAndReinit(s);
@@ -524,7 +524,7 @@ JSVAR_STATIC int jsVarDstrReplace(struct jsVarDstr *s, char *str, char *byStr, i
 
 JSVAR_STATIC int jsVarDstrAppendFile(struct jsVarDstr *res, FILE *ff) {
     int     n, originalSize;
-
+    
     originalSize = res->size;
     n = 1;
     while (n > 0) {
@@ -539,7 +539,7 @@ JSVAR_STATIC int jsVarDstrAppendFile(struct jsVarDstr *res, FILE *ff) {
 JSVAR_STATIC struct jsVarDstr *jsVarDstrCreateByVPrintf(char *fmt, va_list arg_ptr) {
     struct jsVarDstr    *res;
     va_list             arg_ptr_copy;
-
+    
     va_copy(arg_ptr_copy, arg_ptr);
     res = jsVarDstrCreate();
     jsVarDstrAppendVPrintf(res, fmt, arg_ptr_copy);
@@ -551,7 +551,7 @@ JSVAR_STATIC struct jsVarDstr *jsVarDstrCreateByVPrintf(char *fmt, va_list arg_p
 JSVAR_STATIC struct jsVarDstr *jsVarDstrCreateByPrintf(char *fmt, ...) {
     struct jsVarDstr   *res;
     va_list            arg_ptr;
-
+    
     va_start(arg_ptr, fmt);
     res = jsVarDstrCreateByVPrintf(fmt, arg_ptr);
     va_end(arg_ptr);
@@ -560,7 +560,7 @@ JSVAR_STATIC struct jsVarDstr *jsVarDstrCreateByPrintf(char *fmt, ...) {
 
 JSVAR_STATIC struct jsVarDstr *jsVarDstrCreateFromCharPtr(char *s, int slen) {
     struct jsVarDstr   *res;
-
+    
     if (slen < 0) return(NULL);
     res = jsVarDstrCreate();
     jsVarDstrAppendData(res, s, slen);
@@ -580,14 +580,14 @@ JSVAR_STATIC struct jsVarDstr *jsVarDstrCreateByVFileLoad(int useCppFlag, char *
     char                fname[JSVAR_PATH_MAX];
     char                ccc[JSVAR_PATH_MAX+32];
     struct jsVarDstr    *res;
-
+    
     r = vsnprintf(fname, sizeof(fname), fileNameFmt, arg_ptr);
     if (r < 0 || r >= (int) sizeof(fname)) {
         strcpy(fname+sizeof(fname)-5, "...");
         printf("%s: %s:%d: Error: File name too long %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, fname);
         return(NULL);
     }
-
+    
     if (useCppFlag) {
 #if _WIN32
         printf("%s: %s:%d: Error: file preprocessor is not available for Windows: %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, fname);
@@ -609,7 +609,7 @@ JSVAR_STATIC struct jsVarDstr *jsVarDstrCreateByVFileLoad(int useCppFlag, char *
 JSVAR_STATIC struct jsVarDstr *jsVarDstrCreateByFileLoad(int useCppFlag, char *fileNameFmt, ...) {
     va_list             arg_ptr;
     struct jsVarDstr    *res;
-
+    
     va_start(arg_ptr, fileNameFmt);
     res = jsVarDstrCreateByVFileLoad(useCppFlag, fileNameFmt, arg_ptr);
     va_end(arg_ptr);
@@ -738,7 +738,7 @@ JSVAR_STATIC int jsVarWDstrAppendVPrintf(struct jsVarWDstr *s, wchar_t *fmt, va_
     int         n, dsize;
     wchar_t        *d;
     va_list     arg_ptr_copy;
-
+    
     n = 0;
     d = s->s+s->size;
     dsize = s->allocatedSize - s->size;
@@ -762,7 +762,7 @@ JSVAR_STATIC int jsVarWDstrAppendVPrintf(struct jsVarWDstr *s, wchar_t *fmt, va_
 JSVAR_STATIC int jsVarWDstrAppendPrintf(struct jsVarWDstr *s, wchar_t *fmt, ...) {
     int             res;
     va_list         arg_ptr;
-
+    
     va_start(arg_ptr, fmt);
     res = jsVarWDstrAppendVPrintf(s, fmt, arg_ptr);
     va_end(arg_ptr);
@@ -788,10 +788,10 @@ JSVAR_STATIC int jsVarWDstrAppendEscapedStringUsableInJavascriptEval(struct jsVa
 // not yet implemented
 JSVAR_STATIC int jsVarWDstrAppendBase64EncodedData(struct jsVarWDstr *ss, wchar_t *s, int slen) {
     int                         i, c, r;
-
+    
     if (slen < 0) return(-1);
     if (slen == 0) return(0);
-
+    
     jsVarWDstrExpandToSize(ss, ss->size + slen*4/3 + 2);
     r = base64_encode(s, slen, ss->s+ss->size, ss->allocatedSize-ss->size);
     if (r < 0) {
@@ -806,10 +806,10 @@ JSVAR_STATIC int jsVarWDstrAppendBase64EncodedData(struct jsVarWDstr *ss, wchar_
 
 JSVAR_STATIC int jsVarWDstrAppendBase64DecodedData(struct jsVarWDstr *ss, wchar_t *s, int slen) {
     int                         i, c, r;
-
+    
     if (slen < 0) return(-1);
     if (slen == 0) return(0);
-
+    
     jsVarWDstrExpandToSize(ss, ss->size + slen / 4 * 3);
     r = base64_decode(s, slen, ss->s+ss->size, ss->allocatedSize-ss->size);
     if (r < 0) {
@@ -833,7 +833,7 @@ JSVAR_STATIC int jsVarWDstrReplace(struct jsVarWDstr *s, wchar_t *str, wchar_t *
     struct jsVarWDstr   *d;
     int                 i, slen, stlen;
     wchar_t             *ss, *cc;
-
+    
     stlen = wcslen(str);
     slen = s->size;
     ss = jsVarWDstrGetStringAndReinit(s);
@@ -859,7 +859,7 @@ JSVAR_STATIC int jsVarWDstrReplace(struct jsVarWDstr *s, wchar_t *str, wchar_t *
 
 JSVAR_STATIC int jsVarWDstrAppendFile(struct jsVarWDstr *res, FILE *ff) {
     int     n, originalSize;
-
+    
     originalSize = res->size;
     n = 1;
     while (n > 0) {
@@ -874,7 +874,7 @@ JSVAR_STATIC int jsVarWDstrAppendFile(struct jsVarWDstr *res, FILE *ff) {
 JSVAR_STATIC struct jsVarWDstr *jsVarWDstrCreateByVPrintf(wchar_t *fmt, va_list arg_ptr) {
     struct jsVarWDstr    *res;
     va_list             arg_ptr_copy;
-
+    
     va_copy(arg_ptr_copy, arg_ptr);
     res = jsVarWDstrCreate();
     jsVarWDstrAppendVPrintf(res, fmt, arg_ptr_copy);
@@ -886,7 +886,7 @@ JSVAR_STATIC struct jsVarWDstr *jsVarWDstrCreateByVPrintf(wchar_t *fmt, va_list 
 JSVAR_STATIC struct jsVarWDstr *jsVarWDstrCreateByPrintf(wchar_t *fmt, ...) {
     struct jsVarWDstr   *res;
     va_list            arg_ptr;
-
+    
     va_start(arg_ptr, fmt);
     res = jsVarWDstrCreateByVPrintf(fmt, arg_ptr);
     va_end(arg_ptr);
@@ -895,7 +895,7 @@ JSVAR_STATIC struct jsVarWDstr *jsVarWDstrCreateByPrintf(wchar_t *fmt, ...) {
 
 JSVAR_STATIC struct jsVarWDstr *jsVarWDstrCreateFromCharPtr(wchar_t *s, int slen) {
     struct jsVarWDstr   *res;
-
+    
     if (slen < 0) return(NULL);
     res = jsVarWDstrCreate();
     jsVarWDstrAppendData(res, s, slen);
@@ -915,14 +915,14 @@ JSVAR_STATIC struct jsVarWDstr *jsVarWDstrCreateByVFileLoad(int useCppFlag, char
     char                fname[JSVAR_PATH_MAX];
     char                ccc[JSVAR_PATH_MAX+32];
     struct jsVarWDstr    *res;
-
+    
     r = vsnprintf(fname, sizeof(fname), fileNameFmt, arg_ptr);
     if (r < 0 || r >= (int) sizeof(fname)) {
         strcpy(fname+sizeof(fname)-5, "...");
         printf("%s: %s:%d: Error: File name too long %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, fname);
         return(NULL);
     }
-
+    
     if (useCppFlag) {
 #if _WIN32
         printf("%s: %s:%d: Error: file preprocessor is not available for Windows: %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, fname);
@@ -944,7 +944,7 @@ JSVAR_STATIC struct jsVarWDstr *jsVarWDstrCreateByVFileLoad(int useCppFlag, char
 JSVAR_STATIC struct jsVarWDstr *jsVarWDstrCreateByFileLoad(int useCppFlag, char *fileNameFmt, ...) {
     va_list             arg_ptr;
     struct jsVarWDstr    *res;
-
+    
     va_start(arg_ptr, fileNameFmt);
     res = jsVarWDstrCreateByVFileLoad(useCppFlag, fileNameFmt, arg_ptr);
     va_end(arg_ptr);
@@ -968,7 +968,7 @@ void jsVarCallBackFreeHook(struct jsVarCallBackHook *h) {
 
 int jsVarCallBackAddToHook(struct jsVarCallBackHook *h, void *ptr) {
     int i;
-
+    
     i = h->i;
     if (i >= h->dim) {
         h->dim = h->dim * 2 + 1;
@@ -987,7 +987,7 @@ static void jsVarCallBackRemoveIndexFromHook(struct jsVarCallBackHook *h, int i)
 
 void jsVarCallBackRemoveFromHook(struct jsVarCallBackHook *h, void *ptr) {
     int i;
-
+    
     for(i=0; i<h->i && h->a[i] != ptr; i++) ;
     if (i < h->i) {
         jsVarCallBackRemoveIndexFromHook(h, i);
@@ -997,7 +997,7 @@ void jsVarCallBackRemoveFromHook(struct jsVarCallBackHook *h, void *ptr) {
 // if src is NULL, allocate new copy of dst itself
 JSVAR_STATIC void jsVarCallBackCloneHook(struct jsVarCallBackHook *dst, struct jsVarCallBackHook *src) {
     jsVarCallBackHookFunType *a;
-
+    
     if (src != NULL) *dst = *src;
     if (dst->dim != 0) {
         a = dst->a;
@@ -1012,14 +1012,14 @@ JSVAR_STATIC void jsVarCallBackCloneHook(struct jsVarCallBackHook *dst, struct j
 #if ! _WIN32
 static void closeAllFdsFrom(int fd0) {
     int maxd, i;
-
+    
     maxd = sysconf(_SC_OPEN_MAX);
     if (maxd > 1024) maxd = 1024;
     for(i=fd0; i<maxd; i++) close(i);
 }
 
 static int createPipesForPopens(int *in_fd, int *out_fd, int *pin, int *pout) {
-
+    
     if (out_fd != NULL) {
         if (pipe(pin) != 0) {
             printf("%s: %s:%d: Can't create output pipe\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
@@ -1059,19 +1059,19 @@ JSVAR_STATIC pid_t jsVarPopen2(char *command, int *in_fd, int *out_fd, int useBa
     pid_t               pid;
     int                 md;
     char                ccc[strlen(command)+10];
-
+    
     if (createPipesForPopens(in_fd, out_fd, pin, pout) == -1) return(-1);
-
+    
     pid = fork();
-
+    
     if (pid < 0) {
         printf("%s:%s:%d: fork failed in popen2: %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, strerror(errno));
         closePopenPipes(in_fd, out_fd, pin, pout);
         return pid;
     }
-
+    
     if (pid == 0) {
-
+        
         if (out_fd != NULL) {
             close(pin[1]);
             dup2(pin[0], 0);
@@ -1080,12 +1080,12 @@ JSVAR_STATIC pid_t jsVarPopen2(char *command, int *in_fd, int *out_fd, int useBa
             // do not inherit stdin, if no pipe is defined, close it.
             close(0);
         }
-
+        
         // we do not want to loose completely stderr of the task. redirect it to a common file
         md = open("currentsubmsgs.txt", O_WRONLY | O_CREAT | O_APPEND, 0644);
         dup2(md, 2);
         close(md);
-
+        
         if (in_fd != NULL) {
             close(pout[0]);
             dup2(pout[1], 1);
@@ -1094,11 +1094,11 @@ JSVAR_STATIC pid_t jsVarPopen2(char *command, int *in_fd, int *out_fd, int useBa
             // if there is no pipe for stdout, join stderr.
             dup2(2, 1);
         }
-
+        
         // close all remaining fds. This is important because otherwise files and pipes may remain open
         // until the new process terminates.
         closeAllFdsFrom(3);
-
+        
         // Exec is better, because otherwise this process may be unkillable (we would kill the shell not the process itself).
         if (useBashFlag) {
             execlp("bash", "bash", "-c", command, NULL);
@@ -1110,14 +1110,14 @@ JSVAR_STATIC pid_t jsVarPopen2(char *command, int *in_fd, int *out_fd, int useBa
         printf("%s:%s:%d: Exec failed in popen2: %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, strerror(errno));
         exit(1);
     }
-
+    
     if (in_fd != NULL) {
         close(pout[1]);
     }
     if (out_fd != NULL) {
         close(pin[0]);
     }
-
+    
     return pid;
 }
 
@@ -1125,7 +1125,7 @@ JSVAR_STATIC int jsVarPopen2File(char *path, char *ioDirection) {
     char    command[strlen(path)+30];
     int     fd;
     int     r;
-
+    
     if (strcmp(ioDirection, "r") == 0) {
         sprintf(command, "cat %s", path);
         r = jsVarPopen2(command, &fd, NULL, 1);
@@ -1217,14 +1217,14 @@ JSVAR_STATIC int jsVarSetSocketBlocking(int fd) {
 
 JSVAR_STATIC void jsVarTuneSocketForLatency(int fd) {
 #if _WIN32
-  DWORD one;
-  one = 1;
-  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (const char *)&one, sizeof(one));
+    DWORD one;
+    one = 1;
+    setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (const char *)&one, sizeof(one));
 #else
-  int one;
-  one = 1;
-  setsockopt(fd, SOL_TCP, TCP_NODELAY, &one, sizeof(one));
-  setsockopt(fd, SOL_TCP, TCP_QUICKACK, &one, sizeof(one));
+    int one;
+    one = 1;
+    setsockopt(fd, SOL_TCP, TCP_NODELAY, &one, sizeof(one));
+    setsockopt(fd, SOL_TCP, TCP_QUICKACK, &one, sizeof(one));
 #endif
 }
 
@@ -1236,11 +1236,11 @@ JSVAR_STATIC void jsVarTuneSocketForLatency(int fd) {
 
 #define BAIO_STATUSES_CLEARED_PER_TICK              0x0ffff0
 
-#define BAIO_BLOCKED_FOR_READ_IN_SPECIAL_STATUS_MASK (      \
-        0                                       \
-        | BAIO_BLOCKED_FOR_READ_IN_TCPIP_LISTEN \
-        | BAIO_BLOCKED_FOR_READ_IN_SSL_CONNECT  \
-        | BAIO_BLOCKED_FOR_READ_IN_SSL_ACCEPT   \
+#define BAIO_BLOCKED_FOR_READ_IN_SPECIAL_STATUS_MASK (  \
+        0                                               \
+        | BAIO_BLOCKED_FOR_READ_IN_TCPIP_LISTEN         \
+        | BAIO_BLOCKED_FOR_READ_IN_SSL_CONNECT          \
+        | BAIO_BLOCKED_FOR_READ_IN_SSL_ACCEPT           \
         )
 #define BAIO_BLOCKED_FOR_READ_STATUS_MASK (     \
         0                                       \
@@ -1248,11 +1248,11 @@ JSVAR_STATIC void jsVarTuneSocketForLatency(int fd) {
         | BAIO_BLOCKED_FOR_READ_IN_SSL_READ     \
         | BAIO_BLOCKED_FOR_READ_IN_SSL_WRITE    \
         )
-#define BAIO_BLOCKED_FOR_WRITE_IN_SPECIAL_STATUS_MASK (     \
-        0                                           \
-        | BAIO_BLOCKED_FOR_WRITE_IN_TCPIP_CONNECT   \
-        | BAIO_BLOCKED_FOR_WRITE_IN_SSL_CONNECT     \
-        | BAIO_BLOCKED_FOR_WRITE_IN_SSL_ACCEPT      \
+#define BAIO_BLOCKED_FOR_WRITE_IN_SPECIAL_STATUS_MASK ( \
+        0                                               \
+        | BAIO_BLOCKED_FOR_WRITE_IN_TCPIP_CONNECT       \
+        | BAIO_BLOCKED_FOR_WRITE_IN_SSL_CONNECT         \
+        | BAIO_BLOCKED_FOR_WRITE_IN_SSL_ACCEPT          \
         )
 #define BAIO_BLOCKED_FOR_WRITE_STATUS_MASK (        \
         0                                           \
@@ -1361,7 +1361,7 @@ char     *baioSslServerCertPem =
     "EXsfuOksGMYA1iMFGOznXBleK0t57P9BShCTLN6bXbWRjsUDL+0d8geOk7ircYbY\n"
     "qLw0pmgF\n"
     "-----END CERTIFICATE-----\n"
-        ;
+    ;
 char     *baioSslServerKeyPem = 
     "-----BEGIN PRIVATE KEY-----\n"
     "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDBpoSqjn63T3M1\n"
@@ -1391,7 +1391,7 @@ char     *baioSslServerKeyPem =
     "wduW08OZ7ih0n6Zr7W9UKyE2sct5Nqvlo8yo/Ucqic+Mm/y6eLzP6XJZ6lz+V0u6\n"
     "JM5zrrRUGrZTpVzTeKUCMkg9VA==\n"
     "-----END PRIVATE KEY-----\n"
-        ;
+    ;
 //static char       *baioSslTrustedCertFile = "trusted.pem";
 
 
@@ -1424,7 +1424,7 @@ void baioWriteBufferDump(struct baioWriteBuffer *b) {
     int                     si, i;
     struct baioMsg          *m;
     char                    bb[BAIO_DUMP_LINE_SIZE+10];
-
+    
     printf("baioWriteBufferDump Start:\n");
     printf("msgs %d-%d of %d:", b->mi, b->mj, b->msize);
     for(i=b->mi; i!=b->mj; i=BAIO_MSGS_NEXT_INDEX(b,i)) {
@@ -1439,7 +1439,7 @@ void baioWriteBufferDump(struct baioWriteBuffer *b) {
         assert(b->j >= 0 && b->j <= b->size);
         assert(b->jj >= 0 && b->jj <= b->size);
     }
-
+    
     for(i=si=b->i; i!=b->j; i=(i+1)%b->size) {
         if (i%BAIO_DUMP_LINE_SIZE == 0) {bb[BAIO_DUMP_LINE_SIZE]=0; printf("%d: %s\n", si, bb); si=i;}
         if (isprint((unsigned char)b->b[i])) bb[i%BAIO_DUMP_LINE_SIZE] = b->b[i];
@@ -1484,9 +1484,9 @@ static struct baioMsg *wsaioNextMsg(struct baioWriteBuffer *b) {
 static void baioMsgMaybeActivateNextMsg(struct baio *bb) {
     struct baioMsg          *m;
     struct baioWriteBuffer  *b;
-
+    
     if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return;
-
+    
     b = &bb->writeBuffer;
     // skip a msg if any
     m = wsaioNextMsg(b);
@@ -1518,7 +1518,7 @@ static void baioMsgMaybeActivateNextMsg(struct baio *bb) {
 void baioMsgsResizeToHoldSize(struct baio *bb, int newSize) {
     struct baioWriteBuffer  *b;
     int                     shift, usedlen;
-
+    
     b = &bb->writeBuffer;
     if (b->msize == 0) {
         b->msize = newSize;
@@ -1541,22 +1541,22 @@ struct baioMsg *baioMsgPut(struct baio *bb, int startIndex, int endIndex) {
     int                     mjplus, mjminus;
     struct baioMsg          *m;
     struct baioWriteBuffer  *b;
-
+    
     if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return(NULL);
-
+    
     // this is very important, otherwise we may be blocked
     // do not allow zero sized messages
     if (startIndex == endIndex && endIndex != BAIO_INIFINITY_INDEX) return(NULL);
-
+    
     b = &bb->writeBuffer;
-
+    
     if (b->mi == b->mj) baioWriteMsgsInit(b);
-
+    
     // check that previous message was finished
     if (baioMsgInProgress(bb)) {
         printf("%s:%s:%d: Error: Putting a message while previous one is not finished!\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
     }
-
+    
 #if ! BAIO_EACH_WRITTEN_MSG_HAS_RECORD
     if (b->mi == b->mj) {
         // if there are no messages, just fiddle with i,j indexes
@@ -1571,7 +1571,7 @@ struct baioMsg *baioMsgPut(struct baio *bb, int startIndex, int endIndex) {
         }
     }
 #endif
-
+    
     //  if there is no pending msg, reset msg "list"
     if (b->msize == 0) {
         baioMsgsResizeToHoldSize(bb, BAIO_MSGS_BUFFER_RESIZE_INCREASE_OFFSET);
@@ -1583,7 +1583,7 @@ struct baioMsg *baioMsgPut(struct baio *bb, int startIndex, int endIndex) {
         }
     }
     mjplus = BAIO_MSGS_NEXT_INDEX(b,  b->mj);
-
+    
 #if ! BAIO_EACH_WRITTEN_MSG_HAS_RECORD
     // if this is direct continuation of the previous msg, just join them
     // we can not do it if endIndex == BAIO_INIFINITY_INDEX, because such a message is in construction
@@ -1602,7 +1602,7 @@ struct baioMsg *baioMsgPut(struct baio *bb, int startIndex, int endIndex) {
     m->startIndex = startIndex;
     m->endIndex = endIndex;
     b->mj = mjplus;
-
+    
 #if BAIO_EACH_WRITTEN_MSG_HAS_RECORD
     // if each message has record, maybe we have to activate the one we have just added
     baioMsgMaybeActivateNextMsg(bb);
@@ -1617,7 +1617,7 @@ void baioMsgStartNewMessage(struct baio *bb) {
 int baioMsgLastStartIndex(struct baio *bb) {
     struct baioWriteBuffer  *b;
     struct baioMsg          *m;
-
+    
     b = &bb->writeBuffer;
     if (b->mi == b->mj) return(-1);
     m = &b->m[BAIO_MSGS_PREVIOUS_INDEX(b, b->mj)];
@@ -1627,7 +1627,7 @@ int baioMsgLastStartIndex(struct baio *bb) {
 int baioMsgInProgress(struct baio *bb) {
     struct baioWriteBuffer  *b;
     struct baioMsg          *m;
-
+    
     b = &bb->writeBuffer;
     if (b->mi == b->mj) return(0);
     m = &b->m[BAIO_MSGS_PREVIOUS_INDEX(b, b->mj)];
@@ -1638,7 +1638,7 @@ int baioMsgInProgress(struct baio *bb) {
 void baioMsgRemoveLastMsg(struct baio *bb) {
     struct baioWriteBuffer  *b;
     struct baioMsg          *m, *mm;
-
+    
     b = &bb->writeBuffer;
     if (b->mi == b->mj) return;
     b->mj = BAIO_MSGS_PREVIOUS_INDEX(b, b->mj);
@@ -1659,16 +1659,16 @@ void baioMsgRemoveLastMsg(struct baio *bb) {
 int baioMsgResetStartIndexForNewMsgSize(struct baio *bb, int newSize) {
     struct baioWriteBuffer  *b;
     struct baioMsg          *m;
-
+    
     if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return(-1);
-
+    
     b = &bb->writeBuffer;
     if (newSize == 0) {
         // zero size message, simply remove it
         b->mj = BAIO_MSGS_PREVIOUS_INDEX(b, b->mj);
         return(-1);
     }
-
+    
     assert(b->mi != b->mj);
     m = &b->m[BAIO_MSGS_PREVIOUS_INDEX(b, b->mj)];
     assert(m != NULL);
@@ -1680,9 +1680,9 @@ int baioMsgResetStartIndexForNewMsgSize(struct baio *bb, int newSize) {
 void baioMsgSend(struct baio *bb) {
     struct baioWriteBuffer  *b;
     struct baioMsg          *m;
-
+    
     if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return;
-
+    
     b = &bb->writeBuffer;
     assert(b->mi != b->mj);
     m = &b->m[BAIO_MSGS_PREVIOUS_INDEX(b, b->mj)];
@@ -1700,7 +1700,7 @@ void baioMsgLastSetSize(struct baio *bb, int newSize) {
 void baioLastMsgDump(struct baio *bb) {
     struct baioWriteBuffer  *b;
     struct baioMsg          *m;
-
+    
     b = &bb->writeBuffer;
     if (b->mi == b->mj) {
         printf("baioLastMsgDump: Message was joined\n");
@@ -1752,7 +1752,7 @@ int baioReadBufferResize(struct baioReadBuffer *b, int minSize, int maxSize) {
 
 static int baioReadBufferShift(struct baio *bb, struct baioReadBuffer *b) {
     int         delta;
-
+    
     assert(b->i <= b->j);
     delta = b->i;
     memmove(b->b, b->b+delta, (b->j - delta) * sizeof(b->b[0]));
@@ -1817,10 +1817,10 @@ static void baioSslDisconnect(struct baio *bb) {
 
 static void baioFreeZombie(struct baio *bb) {
     int i;
-
+    
     i = bb->index;
     assert(bb == baioTab[i]);
-
+    
     if (bb->readBuffer.i != bb->readBuffer.j) {
         printf("%s:%s:%d: Warning: zombie read.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
     }
@@ -1829,7 +1829,7 @@ static void baioFreeZombie(struct baio *bb) {
     }
     baioReadBufferFree(&bb->readBuffer);
     baioWriteBufferFree(&bb->writeBuffer);
-
+    
     // free all hooks
     jsVarCallBackFreeHook(&bb->callBackOnRead);
     jsVarCallBackFreeHook(&bb->callBackOnWrite);
@@ -1842,7 +1842,7 @@ static void baioFreeZombie(struct baio *bb) {
     jsVarCallBackFreeHook(&bb->callBackOnAccept);
     jsVarCallBackFreeHook(&bb->callBackAcceptFilter);
     jsVarCallBackFreeHook(&bb->callBackOnTcpIpAccept);
-
+    
     if (bb->sslSniHostName != NULL) JSVAR_FREE(bb->sslSniHostName);
     bb->sslSniHostName = NULL;
     JSVAR_FREE(bb); 
@@ -1862,7 +1862,7 @@ static int baioImmediateDeactivate(struct baio *bb) {
     bb->writeBuffer.i = bb->writeBuffer.ij = bb->writeBuffer.j = bb->writeBuffer.jj = 0;
     bb->writeBuffer.mi = bb->writeBuffer.mj = 0;
     bb->sslPending = 0;
-
+    
     if (bb->fd < 0) return(-1);
     if (bb->sslHandle != NULL) baioSslDisconnect(bb);
     if (bb->baioType != BAIO_TYPE_FD && bb->baioType != BAIO_TYPE_FD_SOCKET) {
@@ -1871,7 +1871,7 @@ static int baioImmediateDeactivate(struct baio *bb) {
     // we have to call callback befre reseting fd to -1, because delete call back may need it
     JSVAR_CALLBACK_CALL(bb->callBackOnDelete, callBack(bb));
     bb->fd = -1;
-
+    
     return(0);
 }
 
@@ -1899,9 +1899,9 @@ struct baio *baioFromMagic(int baioMagic) {
 
 static int baioTabFindUnusedEntryIndex(int baioStructType) {
     int i;
-
+    
     for(i=0; i<baioTabMax && baioTab[i] != NULL; i++) ;
-
+    
     if (i >= baioTabMax) {
         if (i >= BAIO_MAX_CONNECTIONS) {
             printf("%s: %s:%d: Error: Can't allocate baio. Too many connections\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
@@ -1932,7 +1932,7 @@ JSVAR_STATIC int baioLibraryInit(int deInitializationFlag) {
 #if _WIN32
     static WSADATA  wsaData;
 #endif
-
+    
     if (libraryInitialized == 0 && deInitializationFlag == 0) {
 #if _WIN32
         r = WSAStartup(MAKEWORD(2,2), &wsaData);
@@ -1956,7 +1956,7 @@ JSVAR_STATIC int baioLibraryInit(int deInitializationFlag) {
 static struct baio *baioInitBasicStructure(int i, int baioType, int ioDirections, int additionalSpaceAllocated, struct baio *parent) {
     struct baio *bb;
     int         parentsize;
-
+    
     bb = baioTab[i];
     assert(bb != NULL);
     if (parent == NULL) {
@@ -1979,7 +1979,7 @@ static struct baio *baioInitBasicStructure(int i, int baioType, int ioDirections
     if (parent == NULL) bb->maxReadBufferSize = (1<<24);
     if (parent == NULL) bb->maxWriteBufferSize = (1<<24);
     if (parent == NULL) bb->optimizeForSpeed = 0;
-
+    
     bb->ioDirections = ioDirections;
     bb->status = BAIO_STATUS_ACTIVE;
     bb->fd = -1;
@@ -1990,13 +1990,13 @@ static struct baio *baioInitBasicStructure(int i, int baioType, int ioDirections
     assert(bb->baioMagic != 0);
     bb->baioType = baioType;
     bb->additionalSpaceAllocated = additionalSpaceAllocated;
-
+    
     // useSsl is inherited, but sslHandle and sslPending are not
     // bb->useSsl = 0;
     bb->sslHandle = NULL;
     bb->sslPending = 0;
     bb->sslSniHostName = NULL;
-
+    
     memset(&bb->readBuffer, 0, sizeof(bb->readBuffer));
 #if 0
     if (bb->ioDirections == BAIO_IO_DIRECTION_READ || bb->ioDirections == BAIO_IO_DIRECTION_RW) {
@@ -2018,7 +2018,7 @@ static struct baio *baioInitBasicStructure(int i, int baioType, int ioDirections
 struct baio *baioNewBasic(int baioType, int ioDirections, int additionalSpaceToAllocate) {
     int             i;
     struct baio     *bb;
-
+    
     baioLibraryInit(0);
     i = baioTabFindUnusedEntryIndex(baioType);
     if (i < 0) return(NULL);
@@ -2106,7 +2106,7 @@ int baioWriteBufferUsedSpace(struct baio *b) {
 int baioPossibleSpaceForWrite(struct baio *bb) {
     struct baioWriteBuffer  *b;
     struct baioMsg          *m;
-
+    
     b = &bb->writeBuffer;
     if (bb->optimizeForSpeed) {
         int     i,j;
@@ -2142,17 +2142,17 @@ static void baioMsgsReindexInterval(struct baioWriteBuffer  *b, int from, int to
 static int baioGetSpaceForWriteInWrappedBuffer(struct baio *bb, int n) {
     int                     r, offset;
     struct baioWriteBuffer  *b;
-
+    
     
     b = &bb->writeBuffer;
     assert(b->j < b->i);
     assert(b->jj > 0);
-
+    
 // printf("RESIZE: %p: baioGetSpaceForWriteInWrappedBuffer: 0\n", b);
-
+    
     // we have space between j until i, if not enough allocate extra space and increase i
     if (b->i - b->j <= n && bb->optimizeForSpeed) return(-1);
-
+    
     // printf("6");fflush(stdout);
     while (b->size - b->jj + b->i - b->j <= n) {
         r = baioWriteBufferResize(&bb->writeBuffer, bb->initialWriteBufferSize, bb->maxWriteBufferSize);
@@ -2178,20 +2178,20 @@ static int baioGetSpaceForWriteInEmptyBuffer(struct baio *bb, int n) {
     int                     r;
     struct baioWriteBuffer  *b;
     struct baioMsg          *m;
-
+    
 //printf("RESIZE: %p: baioGetSpaceForWriteInEmptyBuffer: 0\n", b);
-
+    
     b = &bb->writeBuffer;
     // actually there can be message which is going to be constructed
     // assert(b->mi == b->mj);
-
+    
     while (b->size <= n) {
         r = baioWriteBufferResize(&bb->writeBuffer, bb->initialWriteBufferSize, bb->maxWriteBufferSize);
         if (r < 0) return(-1);
     }
     // O.K. if we have enough of space
     // if (baioSizeOfContinuousFreeSpaceForWrite(b) > n) return(0);
-
+    
     // no, reset buffer
     b->i = b->ij = b->j = b->jj = 0;
     if (b->mi != b->mj) {
@@ -2207,14 +2207,14 @@ static int baioGetSpaceForWriteInEmptyBuffer(struct baio *bb, int n) {
 static int baioGetSpaceForWriteInNonEmptyLinearBufferAllMessagesReady(struct baio *bb, int n) {
     int                     r, offset;
     struct baioWriteBuffer  *b;
-
+    
     b = &bb->writeBuffer;
     assert(b->i < b->j);
-
+    
     // Unfortunately, all this branch is absolutely non-tested, because we always have a message being composed
     // TODO: Test this in some way
 //printf("RESIZE: %p: baioGetSpaceForWriteInNonEmptyLinearBufferAllMessagesReadys: 0\n", b);
-
+    
     // if we have enough of space at the end of buffer, do nothing
     if (b->size - b->j > n) return(0);
     // if not, if we have enough of space at the begginning of buffer, wrap buffer
@@ -2270,25 +2270,25 @@ static int baioGetSpaceForWriteInNonEmptyLinearBufferWithWaitingMessages(struct 
     int                     r, msglen, offset;
     struct baioWriteBuffer  *b;
     struct baioMsg          *m;
-
+    
     b = &bb->writeBuffer;
     assert(b->i < b->j);
     assert(b->mi != b->mj);
-
+    
 //printf("RESIZE: %p: baioGetSpaceForWriteInNonEmptyLinearBufferWithWaitingMessages: 0\n", b);
-
+    
     // if we have enough of space at the end of buffer, do nothing
     if (b->size - b->j > n) return(0);
     // get last message
     m = &b->m[BAIO_MSGS_PREVIOUS_INDEX(b, b->mj)];
-
+    
     if (m->endIndex != BAIO_INIFINITY_INDEX) {
         // printf("RESIZE: %p: baioGetSpaceForWriteInNonEmptyLinearBufferWithWaitingMessages: 1\n", b);
         // last message was finished we do not need to care about it
         r = baioGetSpaceForWriteInNonEmptyLinearBufferAllMessagesReady(bb, n);
         return(r);
     }
-
+    
     // we are currently composing message and we need more space
     msglen = b->j - m->startIndex;
     if (b->i/*??? why there was -1*/ > msglen + n || (b->i == m->startIndex && b->size > msglen + n)) {
@@ -2337,7 +2337,7 @@ static int baioGetSpaceForWriteInNonEmptyLinearBufferWithWaitingMessages(struct 
 static int baioGetSpaceForWriteInLinearBuffer(struct baio *bb, int n) {
     int                     r;
     struct baioWriteBuffer  *b;
-
+    
     b = &bb->writeBuffer;
     if (b->mi == b->mj) {
         r = baioGetSpaceForWriteInNonEmptyLinearBufferAllMessagesReady(bb, n);
@@ -2350,7 +2350,7 @@ static int baioGetSpaceForWriteInLinearBuffer(struct baio *bb, int n) {
 static int baioGetSpaceForWrite(struct baio *bb, int n) {
     int                     r;
     struct baioWriteBuffer  *b;
-
+    
     // We need space in a msg based ring buffer
     b = &bb->writeBuffer;
     if (b->i == b->j) {
@@ -2366,9 +2366,9 @@ static int baioGetSpaceForWrite(struct baio *bb, int n) {
 int baioMsgReserveSpace(struct baio *bb, int len) {
     int                     r;
     struct baioWriteBuffer  *b;
-
+    
     if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return(-1);
-
+    
     b = &bb->writeBuffer;
     r = baioGetSpaceForWrite(bb, len);
     if (r < 0) return(-1);
@@ -2380,9 +2380,9 @@ int baioWriteToBuffer(struct baio *bb, char *s, int len) {
     int                     r;
     char                    *d;
     struct baioWriteBuffer  *b;
-
+    
     if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return(-1);
-
+    
     r = baioGetSpaceForWrite(bb, len);
     if (r < 0) return(-1);
     b = &bb->writeBuffer;
@@ -2403,9 +2403,9 @@ int baioVprintfToBuffer(struct baio *bb, char *fmt, va_list arg_ptr) {
     int                     n, r, dsize;
     struct baioWriteBuffer  *b;
     va_list                 arg_ptr_copy;
-
+    
     if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return(-1);
-
+    
     b = &bb->writeBuffer;
     dsize = baioSizeOfContinuousFreeSpaceForWrite(b);
     if (dsize <= 0) {
@@ -2432,7 +2432,7 @@ int baioVprintfToBuffer(struct baio *bb, char *fmt, va_list arg_ptr) {
         JsVarInternalCheck(n>=0);
         va_copy_end(arg_ptr_copy);
     }
-
+    
     b->j += n;
     return(n);
 }
@@ -2440,7 +2440,7 @@ int baioVprintfToBuffer(struct baio *bb, char *fmt, va_list arg_ptr) {
 int baioPrintfToBuffer(struct baio *bb, char *fmt, ...) {
     int             res;
     va_list         arg_ptr;
-
+    
     va_start(arg_ptr, fmt);
     res = baioVprintfToBuffer(bb, fmt, arg_ptr);
     va_end(arg_ptr);
@@ -2457,7 +2457,7 @@ int baioVprintfMsg(struct baio *bb, char *fmt, va_list arg_ptr) {
 int baioPrintfMsg(struct baio *bb, char *fmt, ...) {
     int             res;
     va_list         arg_ptr;
-
+    
     va_start(arg_ptr, fmt);
     res = baioVprintfMsg(bb, fmt, arg_ptr);
     va_end(arg_ptr);
@@ -2482,22 +2482,22 @@ JSVAR_STATIC int baioSslLibraryInit() {
     char        *errtype;
     
     if (libraryInitialized) return(0);
-
+    
     // Register the error strings for libcrypto & libssl
     SSL_load_error_strings();
     // Register the available ciphers and digests
     SSL_library_init();
-
+    
     // We are probably sticked with SSL version 2 because of some servers
     baioSslContext = SSL_CTX_new(SSLv23_method());
     // A more recommended metod (according doc)
     // baioSslContext = SSL_CTX_new(TLS_method());
-
+    
     if (baioSslContext == NULL) {
         ERR_print_errors_fp(stderr);
         return(-1);
     }
-
+    
     /* Load server certificate */
     if (baioSslServerCertFile != NULL) {
         // if file was specified, load from file
@@ -2547,12 +2547,12 @@ JSVAR_STATIC int baioSslLibraryInit() {
         // baioSslContext = NULL;
         // return(-1);
     }
-
+    
     
 #if 0
     /* unlock this code and define baioSslTrustedCertFile, if you want to verify certificates */
     SSL_CTX_set_verify(baioSslContext, SSL_VERIFY_PEER, baioSslVerifyCallback);
-
+    
     if(! SSL_CTX_load_verify_locations(baioSslContext, baioSslTrustedCertFile, NULL)) {
         printf("%s:%s:%d: Can't load trusted certificates %s.", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, baioSslTrustedCertFile);
         ERR_print_errors_fp(stdout);
@@ -2561,7 +2561,7 @@ JSVAR_STATIC int baioSslLibraryInit() {
         return(-1);
     }
 #endif
-
+    
     SSL_CTX_set_mode(baioSslContext, SSL_MODE_ENABLE_PARTIAL_WRITE | SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
     libraryInitialized = 1;
     return(0);
@@ -2569,36 +2569,36 @@ JSVAR_STATIC int baioSslLibraryInit() {
 
 static int baioSslHandleInit(struct baio *bb) {
     int r;
-
+    
     r = baioSslLibraryInit();
     if (r != 0) return(r);
-
+    
     // Create an SSL struct for the connection
     bb->sslHandle = SSL_new(baioSslContext);
     if (bb->sslHandle == NULL) return(-1);
-
+    
     // Connect the SSL struct to our connection
     if (! SSL_set_fd(bb->sslHandle, bb->fd)) return(-1);
-
+    
     return(0);
 }
 
 static void baioSslConnect(struct baio *bb) {
     int err, r;
-
+    
     if (bb->sslHandle == NULL) return;
-
+    
     ERR_clear_error();
     // SNI support
     if (bb->sslSniHostName != NULL) SSL_set_tlsext_host_name(bb->sslHandle, bb->sslSniHostName);
     r = SSL_connect(bb->sslHandle);
-
+    
     if (r == 0) {
         // First set status, then callbak, so that I can use the same callback as for copy
         bb->status |= BAIO_STATUS_EOF_READ;
         JSVAR_CALLBACK_CALL(bb->callBackOnEof, callBack(bb));
     }
-
+    
     if (r < 0) {
         err = SSL_get_error(bb->sslHandle, r);
         if (err == SSL_ERROR_WANT_READ) {
@@ -2618,7 +2618,7 @@ static void baioSslConnect(struct baio *bb) {
 
 static void baioOnTcpIpConnected(struct baio *bb) {
     int     r;
-
+    
     JSVAR_CALLBACK_CALL(bb->callBackOnTcpIpConnect, callBack(bb));
     // It seems that I should getsockopt to read the SO_ERROR to check if connection was successful, however is it really necessary?
     {
@@ -2627,7 +2627,7 @@ static void baioOnTcpIpConnected(struct baio *bb) {
         getsockopt(bb->fd, SOL_SOCKET, SO_ERROR, (char*)&err, &len);
         if (err != 0) {baioCloseOnError(bb); return;}
     }
-
+    
     if (bb->useSsl == 0) {
         // nothing more to do if clean connection
         JSVAR_CALLBACK_CALL(bb->callBackOnConnect, callBack(bb));
@@ -2643,12 +2643,12 @@ static void baioOnTcpIpConnected(struct baio *bb) {
 
 static void baioSslAccept(struct baio *bb) {
     int r, err;
-
+    
     if (bb->sslHandle == NULL) return;
-
+    
     ERR_clear_error();
     r = SSL_accept(bb->sslHandle);
-
+    
     // printf("%s: ssl_accept returned %d\n", JSVAR_PRINT_PREFIX(), r); fflush(stdout);
     if (r == 1) {
         // accepted
@@ -2656,7 +2656,7 @@ static void baioSslAccept(struct baio *bb) {
         if (jsVarDebugLevel > 0) printf("%s: %s:%d: SSL connection accepted on socket %d\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, bb->fd);
         return;
     }
-
+    
     // not accepted
     err = SSL_get_error(bb->sslHandle, r);
     // printf("%s: err == %d\n", JSVAR_PRINT_PREFIX(), err); fflush(stdout);    
@@ -2677,10 +2677,10 @@ static void baioOnTcpIpListenActivated(struct baio *bb) {
     unsigned                ip, port;
     struct baio             *cc;
     socklen_t               len;
-
+    
     // anyway I'll continue listening
     bb->status |= BAIO_BLOCKED_FOR_READ_IN_TCPIP_LISTEN;
-
+    
     len = sizeof(clientaddr);
     fd = accept(bb->fd, (struct sockaddr *)&clientaddr, &len);
     if (fd < 0) {
@@ -2695,18 +2695,18 @@ static void baioOnTcpIpListenActivated(struct baio *bb) {
     }
     ip = clientaddr.sin_addr.s_addr;
     port = clientaddr.sin_port;
-
+    
     if (jsVarDebugLevel > 0) printf("%s: connection accepted from %s:%d on socket %d.\n", JSVAR_PRINT_PREFIX(), jsVarSprintfIpAddress_st(ip), port, bb->fd);
-
+    
     r = 0;
     JSVAR_CALLBACK_CALL(bb->callBackAcceptFilter, (r = callBack(bb, ip, port)));
-
+    
     // reject connection if filter rejected
     if (r < 0) {
         closesocket(fd);
         return;
     }
-
+    
     // continue with creating new baio
     i = baioTabFindUnusedEntryIndex(BAIO_TYPE_TCPIP_SCLIENT);
     if (i < 0) {
@@ -2744,7 +2744,7 @@ static int baioItIsPreferrableToResizeReadBufferOverMovingData(struct baioReadBu
 
 static void baioNormalizeBufferBeforeRead(struct baioReadBuffer *b, struct baio *bb) {
     int delta; 
-
+    
     if (b->i == b->j) {
         // we have previously processed all the buffer, reset indexes to start from the very beginning
         b->i = b->j = 0;
@@ -2766,7 +2766,7 @@ static void baioNormalizeBufferBeforeRead(struct baioReadBuffer *b, struct baio 
 static void baioHandleSuccesfullRead(struct baio *bb, int n) {
     struct baioReadBuffer   *b;
     int                     sj;
-
+    
     b = &bb->readBuffer;
     if (n == 0) {
         // end of file
@@ -2791,7 +2791,7 @@ static int baioOnCanRead(struct baio *bb) {
     struct baioReadBuffer   *b;
     int                     n;
     int                     minFreeSizeAtEndOfReadBuffer;
-
+    
     b = &bb->readBuffer;
     minFreeSizeAtEndOfReadBuffer = bb->minFreeSizeAtEndOfReadBuffer;
     baioNormalizeBufferBeforeRead(b, bb);
@@ -2810,10 +2810,10 @@ static int baioOnCanSslRead(struct baio *bb) {
     struct baioReadBuffer   *b;
     int                     n, err;
     int                     minFreeSizeAtEndOfReadBuffer;
-
+    
     assert(bb->useSsl);
     if (bb->sslHandle == NULL) return(0);
-
+    
     b = &bb->readBuffer;
     minFreeSizeAtEndOfReadBuffer = bb->minFreeSizeAtEndOfReadBuffer;
     baioNormalizeBufferBeforeRead(b, bb);
@@ -2841,7 +2841,7 @@ static int baioOnCanSslRead(struct baio *bb) {
 static int baioWriteOrSslWrite(struct baio *bb) {
     struct baioWriteBuffer  *b;
     int                     n, err, len;
-
+    
     b = &bb->writeBuffer;
     if (bb->useSsl == 0) {
         len = b->ij - b->i;
@@ -2883,11 +2883,11 @@ int baioOnCanWrite(struct baio *bb) {
     struct baioWriteBuffer  *b;
     int                     n;
     int                     si;
-
+    
     n = 0;
     b = &bb->writeBuffer;
     si = b->i;
-
+    
     // only one write is allowed by select, go back to the main loop after a single write
     if (bb->fd >= 0 && b->i < b->ij) {
         n = baioWriteOrSslWrite(bb);
@@ -2895,7 +2895,7 @@ int baioOnCanWrite(struct baio *bb) {
         b->i += n;
     }
     baioMsgMaybeActivateNextMsg(bb);
-
+    
     if (n != 0) JSVAR_CALLBACK_CALL(bb->callBackOnWrite, callBack(bb, si, n));
     // Attention has been taken here, because onWrite callback can itself write something
     // On the other hand we shall not call it on closed bb and we shall not shift it before
@@ -2931,7 +2931,7 @@ int baioSetSelectParams(int maxfd, fd_set *readfds, fd_set *writefds, fd_set *ex
     int             flagWaitingForReadFd;
     int             flagWaitingForWriteFd;
     int             flagForZeroTimeoutAsBufferedDataAvailableWithoutFd;
-
+    
     flagForZeroTimeoutAsBufferedDataAvailableWithoutFd = 0;
     for(i=0; i<baioTabMax; i++) {
         bb = baioTab[i];
@@ -3019,7 +3019,7 @@ int baioOnSelectEvent(int maxfd, fd_set *readfds, fd_set *writefds, fd_set *exce
     int             i, fd, max, res;
     unsigned        status;
     struct baio     *bb;
-
+    
     res = 0;
     // loop until current baioTabMax, actions in the loop may add new descriptors, but those
     // were not waited at this moment. Do not check them
@@ -3126,7 +3126,7 @@ int baioSelect(int maxfd, fd_set *r, fd_set *w, fd_set *e, struct timeval *t) {
 #if _WIN32
     int             i, fd;
     struct baio     *bb;
-
+    
     // Remove all file related fds from select as Windows do not manage this.
     // Only sockets can be sent to select. Files are considered as ready to read/write.
     uint8_t         imask[BAIO_MAX_CONNECTIONS];
@@ -3157,7 +3157,7 @@ int baioSelect(int maxfd, fd_set *r, fd_set *w, fd_set *e, struct timeval *t) {
 #else
     res = select(maxfd, r, w, e, t);
 #endif  
-
+    
     return(res);
 }
 
@@ -3165,11 +3165,11 @@ int baioPoll2(int timeOutUsec, int (*addUserFds)(int maxfd, fd_set *r, fd_set *w
     fd_set          r, w, e;
     struct timeval  t;
     int             maxfd, res;
-
+    
     FD_ZERO(&r);
     FD_ZERO(&w);
     FD_ZERO(&e);
-
+    
     t.tv_sec = timeOutUsec / 1000000LL;
     t.tv_usec = timeOutUsec % 1000000LL; 
     maxfd = baioSetSelectParams(0, &r, &w, &e, &t);
@@ -3201,9 +3201,9 @@ struct baio *baioNewFile(char *path, int ioDirection, int additionalSpaceToAlloc
     struct baio     *bb;
     int             r, fd;
     unsigned        flags;
-
+    
     if (path == NULL) return(NULL);
-
+    
     if (ioDirection == BAIO_IO_DIRECTION_READ) flags = (O_RDONLY);
     else if (ioDirection == BAIO_IO_DIRECTION_WRITE) flags = (O_WRONLY | O_CREAT | O_TRUNC);
     else if (ioDirection == BAIO_IO_DIRECTION_RW) flags = (O_RDWR | O_CREAT | O_TRUNC);
@@ -3211,12 +3211,12 @@ struct baio *baioNewFile(char *path, int ioDirection, int additionalSpaceToAlloc
         printf("%s:%s:%d: Invalid ioDirection\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
         return(NULL);
     }
-
+    
     // if not windows
     // flags |= O_NONBLOCK;
-
+    
     // printf("%s: Opening file %s:%o\n", JSVAR_PRINT_PREFIX(), path, flags);
-
+    
     fd = open(path, flags, 00644);
 #if ! _WIN32
     r = jsVarSetFileNonBlocking(fd);
@@ -3226,7 +3226,7 @@ struct baio *baioNewFile(char *path, int ioDirection, int additionalSpaceToAlloc
         return(NULL);
     }
 #endif
-
+    
     bb = baioNewBasic(BAIO_TYPE_FILE, ioDirection, additionalSpaceToAllocate);
     bb->fd = fd;
     return(bb);
@@ -3240,11 +3240,11 @@ struct baio *baioNewFile(char *path, int ioDirection, int additionalSpaceToAlloc
 struct baio *baioNewPseudoFile(char *string, int stringLength, int additionalSpaceToAllocate) {
     struct baio     *bb;
     int             r;
-
+    
     if (string == NULL) return(NULL);
-
+    
     // printf("%s: Opening pseudo file\n", JSVAR_PRINT_PREFIX());
-
+    
     bb = baioNewBasic(BAIO_TYPE_FILE, BAIO_IO_DIRECTION_READ, additionalSpaceToAllocate);
     bb->status |= BAIO_STATUS_EOF_READ;
     r = baioReadBufferResize(&bb->readBuffer, stringLength, stringLength);
@@ -3255,7 +3255,7 @@ struct baio *baioNewPseudoFile(char *string, int stringLength, int additionalSpa
     memmove(bb->readBuffer.b, string, stringLength);
     bb->readBuffer.i = 0;
     bb->readBuffer.j = stringLength;
-
+    
     return(bb);
 }
 
@@ -3269,22 +3269,22 @@ struct baio *baioNewPipedFile(char *path, int ioDirection, int additionalSpaceTo
     struct baio     *bb;
     int             r, fd;
     char            *iod;
-
+    
 #if _WIN32
     printf("%s:%s:%d: Piped files are not available for Windows system. Use socket file instead.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
     return(NULL);
 #else
-
+    
     if (path == NULL) return(NULL);
-
+    
     if (ioDirection == BAIO_IO_DIRECTION_READ) iod = "r";
     else if (ioDirection == BAIO_IO_DIRECTION_WRITE) iod = "w";
     else {
         printf("%s:%s:%d: Invalid ioDirection: piped file can be open for read only or write only.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
         return(NULL);
     }
-
-
+    
+    
     fd = jsVarPopen2File(path, iod);
     if (fd < 0) return(NULL);
     r = jsVarSetFileNonBlocking(fd);
@@ -3293,9 +3293,9 @@ struct baio *baioNewPipedFile(char *path, int ioDirection, int additionalSpaceTo
         close(fd);
         return(NULL);
     }
-
+    
     // printf("%s: Opening piped file %s\n", JSVAR_PRINT_PREFIX(), path);
-
+    
     bb = baioNewBasic(BAIO_TYPE_PIPED_FILE, ioDirection, additionalSpaceToAllocate);
     bb->fd = fd;
     return(bb);
@@ -3309,12 +3309,12 @@ struct baio *baioNewPipedCommand(char *command, int ioDirection, int additionalS
     struct baio     *bb;
     int             r, fd;
     char            *iod;
-
+    
 #if _WIN32
     printf("%s:%s:%d: Piped commandss are not available for Windows system. \n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
     return(NULL);
 #else
-
+    
     if (command == NULL) return(NULL);
     if (ioDirection == BAIO_IO_DIRECTION_READ) {
         r = jsVarPopen2(command, &fd, NULL, 1);
@@ -3362,7 +3362,7 @@ static int baioGetSockAddr(char *hostName, int port, struct sockaddr *out_saddr,
     int                     r;
     struct addrinfo         *server, hints;
     char                    ps[JSVAR_TMP_STRING_SIZE];
-
+    
     server = NULL;
     memset(&hints, 0, sizeof(hints) );
     // hints.ai_family = AF_UNSPEC;
@@ -3387,7 +3387,7 @@ static int baioGetSockAddr(char *hostName, int port, struct sockaddr *out_saddr,
 #else
     struct hostent      *server;
     int                 n;
-
+    
     server = gethostbyname(hostName);
     if (server == NULL) return(-1);
     if (out_saddr == NULL) return(-1);
@@ -3406,29 +3406,29 @@ struct baio *baioNewTcpipClient(char *hostName, int port, enum baioSslFlags sslF
     int                     r, fd;
     struct sockaddr         saddr;
     int                     saddrlen;
-
-
+    
+    
     saddrlen = sizeof(saddr);
     r = baioGetSockAddr(hostName, port, &saddr, &saddrlen);
-
+    
     if (r != 0) return(NULL);
     if (saddrlen < 0) return(NULL);
-
+    
     bb = baioNewBasic(BAIO_TYPE_TCPIP_CLIENT, BAIO_IO_DIRECTION_RW, additionalSpaceToAllocate);
-
+    
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
         printf("%s: %s:%d: Can't create socket\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
         baioImmediateDeactivate(bb);
         return(NULL);
     }
-
+    
     r = jsVarSetSocketNonBlocking(fd);
     if (r < 0) {
         printf("%s: %s:%d: Can't set socket non blocking\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
         goto failreturn;
     }
-
+    
     bb->fd = fd;
     r = baioSetUseSslFromSslFlag(bb, sslFlag);
     if (r < 0) {
@@ -3439,27 +3439,27 @@ struct baio *baioNewTcpipClient(char *hostName, int port, enum baioSslFlags sslF
     }
     // SNI support?
     bb->sslSniHostName = strDuplicate(hostName);
-
+    
     if (jsVarDebugLevel > 5) printf("%s: Connecting to %s:%d\n", JSVAR_PRINT_PREFIX(), jsVarSprintfIpAddress_st(((struct sockaddr_in*)&saddr)->sin_addr.s_addr), ntohs(((struct sockaddr_in*)&saddr)->sin_port));
-
+    
     // connect
     r = connect(fd, &saddr, saddrlen);
 #if _WIN32
     if (r == 0 || (r == SOCKET_ERROR && (WSAGetLastError() == EINPROGRESS || WSAGetLastError() == WSAEWOULDBLOCK))) 
 #else
-    if (r == 0 || (r < 0 && errno == EINPROGRESS)) 
+        if (r == 0 || (r < 0 && errno == EINPROGRESS)) 
 #endif
-    {
-        // connected or pending connect
-        // do not immediately call sslconnect even if connected here, rather return bb let the user to setup
-        // callbacks go through select and continue there
-        bb->status |= BAIO_BLOCKED_FOR_WRITE_IN_TCPIP_CONNECT;
-    } else {
-        printf("%s: %s:%d: Connect returned %d: %s!\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, r, JSVAR_STR_ERRNO());
-        goto failreturn;
-    }
+        {
+            // connected or pending connect
+            // do not immediately call sslconnect even if connected here, rather return bb let the user to setup
+            // callbacks go through select and continue there
+            bb->status |= BAIO_BLOCKED_FOR_WRITE_IN_TCPIP_CONNECT;
+        } else {
+            printf("%s: %s:%d: Connect returned %d: %s!\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, r, JSVAR_STR_ERRNO());
+            goto failreturn;
+        }
     return(bb);
-
+    
 failreturn:
     closesocket(fd);
     baioImmediateDeactivate(bb);
@@ -3475,31 +3475,31 @@ struct baio *baioNewTcpipServer(int port, enum baioSslFlags sslFlag, int additio
 #else
     int                     one;
 #endif
-
+    
     if (port < 0) return(NULL);
-
+    
     bb = baioNewBasic(BAIO_TYPE_TCPIP_SERVER, BAIO_IO_DIRECTION_RW, additionalSpaceToAllocate);
-
+    
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
         printf("%s: %s:%d: Can't create socket\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
         baioImmediateDeactivate(bb);
         return(NULL);
     }
-
+    
     one = 1;
     r = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char *) &one, sizeof(one));
     if (r < 0) {
         printf("%s: %s:%d: Can't set socket reusable\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
         goto failreturn;
     }
-
+    
     r = jsVarSetSocketNonBlocking(fd);
     if (r < 0) {
         printf("%s: %s:%d: Can't set socket non blocking\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
         goto failreturn;
     }
-
+    
     r = baioSetUseSslFromSslFlag(bb, sslFlag);
     if (r < 0) {
         printf("%s: %s:%d: Can't set ssl. Baio is compiled without ssl support\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
@@ -3507,32 +3507,32 @@ struct baio *baioNewTcpipServer(int port, enum baioSslFlags sslFlag, int additio
     } else if (r > 0) {
         printf("%s: %s:%d: Warning: wrong value for sslFlag\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
     }
-
+    
     memset(&sockaddr, 0, sizeof(sockaddr));
     sockaddr.sin_family = AF_INET;
     sockaddr.sin_addr.s_addr = INADDR_ANY;
     // next line shall restrict connections on loppback device only
     // sockaddr.sin_addr.s_addr = htonl(2130706433L)
     sockaddr.sin_port = htons(port);
-
+    
     if (jsVarDebugLevel > 0) printf("%s: Listening on %d\n", JSVAR_PRINT_PREFIX(), port);
-
+    
     r = bind(fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
     if (r < 0) {
         printf("%s: %s:%d: Bind to %d failed: %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, port, JSVAR_STR_ERRNO());
         goto failreturn;
     }
-
+    
     r = listen(fd, 128);
     if (r < 0) {
         printf("%s: %s:%d: Listen for %d failed: %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, port, JSVAR_STR_ERRNO());
         goto failreturn;
     }
-
+    
     bb->status |= BAIO_BLOCKED_FOR_READ_IN_TCPIP_LISTEN;
     bb->fd = fd;
     return(bb);
-
+    
 failreturn:
     closesocket(fd);
     baioImmediateDeactivate(bb);
@@ -3548,7 +3548,7 @@ failreturn:
 #if _WIN32
 DWORD WINAPI baioSocketFileServerThreadStartRoutine(LPVOID arg)
 #else
-void *baioSocketFileServerThreadStartRoutine(void *arg) 
+    void *baioSocketFileServerThreadStartRoutine(void *arg) 
 #endif
 {
     struct baioOpenSocketFileData   *targ;
@@ -3560,22 +3560,22 @@ void *baioSocketFileServerThreadStartRoutine(void *arg)
     char                            buffer[BAIO_SOCKET_FILE_BUFFER_SIZE];
     fd_set                          rset;
     struct timeval                  tout;
-
+    
     newsockfd = -1;
-
+    
     // signal(SIGCHLD, zombieHandler);              // avoid system of keeping child zombies
     targ = (struct baioOpenSocketFileData *) arg;
-
+    
     // This is a kind of timeout, if the main thread does not connect within 10 seconds, exit
     FD_ZERO(&rset);
     FD_SET(targ->sockFd, &rset);
     tout.tv_sec = 10;
     tout.tv_usec = 0;
     r = select(targ->sockFd+1, &rset, NULL, NULL, &tout);
-
+    
     // If timeout, abort thread
     if (r == 0) goto finito;
-
+    
     clilen = sizeof(cli_addr);
     newsockfd = accept(targ->sockFd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0) {
@@ -3583,7 +3583,7 @@ void *baioSocketFileServerThreadStartRoutine(void *arg)
         goto finito;
     }
     //printf("%s: baioOpenSocketFileServerThread: Connection Accepted for %s\n", JSVAR_PRINT_PREFIX(), targ->path);
-
+    
     if (targ->ioDirection == BAIO_IO_DIRECTION_READ) {
         ff = fopen(targ->path, "rb");
         if (ff == NULL) {
@@ -3611,7 +3611,7 @@ void *baioSocketFileServerThreadStartRoutine(void *arg)
         } while (n > 0);
         fclose(ff);
     }
-
+    
 finito:
     if (newsockfd >= 0) closesocket(newsockfd);
     closesocket(targ->sockFd);
@@ -3630,11 +3630,11 @@ static int baioSocketFileLaunchServerThread(char *path, int ioDirection) {
     int                             sockfd, portno;
     socklen_t                       slen;
     struct sockaddr_in              serv_addr;
-
+    
     static int                      baioOpenSocketFileDisabled = 0;
-
+    
     if (baioOpenSocketFileDisabled) return(-1);
-
+    
     // Start a simple TCP/IP server, which will listen in another thread
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
@@ -3665,15 +3665,15 @@ static int baioSocketFileLaunchServerThread(char *path, int ioDirection) {
         closesocket(sockfd);
         return(-1);
     }
-
+    
     pathlen = strlen(path);
     targ = (struct baioOpenSocketFileData *) malloc(sizeof(struct baioOpenSocketFileData) + pathlen + 1);
     targ->ioDirection = ioDirection;
     strcpy(targ->path, path);
     targ->sockFd = sockfd;
-
+    
 #if _WIN32
-
+    
     {
         HANDLE ttt;
         ttt = CreateThread(NULL, 0, baioSocketFileServerThreadStartRoutine, targ, 0, NULL);
@@ -3691,9 +3691,9 @@ static int baioSocketFileLaunchServerThread(char *path, int ioDirection) {
             baioOpenSocketFileDisabled = 1;
         }
     }
-
+    
 #else
-
+    
 #if JSVAR_PTHREADS
     {
         pthread_t ttt;
@@ -3715,7 +3715,7 @@ static int baioSocketFileLaunchServerThread(char *path, int ioDirection) {
     printf("%s: %s:%d: Error: JSVAR must be linked with pthreads and macro JSVAR_PTHREADS defined to use socket files on Unix systems!\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
 #endif
 #endif
-
+    
     return(portno);
 }
 
@@ -3724,19 +3724,19 @@ struct baio *baioNewSocketFile(char *path, int ioDirection, int additionalSpaceT
     int                 portno;
     struct sockaddr_in  serv_addr;
     struct hostent      *server;
-
+    
     if (path == NULL) return(NULL);
-
+    
     if (ioDirection != BAIO_IO_DIRECTION_READ && ioDirection != BAIO_IO_DIRECTION_WRITE) {
         printf("%s:%s:%d: Invalid ioDirection: socket file can be open for read only or write only.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
         return(NULL);
     }
     portno = baioSocketFileLaunchServerThread(path, ioDirection);
     if (portno < 0) return(NULL);
-
+    
     // printf("Socket file: using port %d\n", portno);
     // printf("%s: Opening socket file %s\n", JSVAR_PRINT_PREFIX(), path);
-
+    
     // TODO: I need some elementary synchronization, not to connect before the thread is accepting connections
     // usleep(1);
     bb = baioNewTcpipClient("127.0.0.1", portno, BAIO_SSL_NO, additionalSpaceToAllocate);
@@ -3798,10 +3798,10 @@ enum wsaioHttpHeaders {
     WSAIO_HTTP_HEADER_Host,
     WSAIO_HTTP_HEADER_Origin,
     WSAIO_HTTP_HEADER_Upgrade,
-
+    
     WSAIO_HTTP_HEADER_Accept_Encoding,
     WSAIO_HTTP_HEADER_Content_Length,
-
+    
     WSAIO_HTTP_HEADER_Sec_WebSocket_Key,
     WSAIO_HTTP_HEADER_Sec_WebSocket_Protocol,
     WSAIO_HTTP_HEADER_Sec_WebSocket_Version,
@@ -3817,7 +3817,7 @@ static int  wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_MAX];
 #if 0
 static char *wsaioStrnchr(char *s, int len, int c) {
     char *send;
-
+    
     if (s == NULL) return(NULL);
     send = s+len;
     while (s<send && *s != c) s++;
@@ -3834,9 +3834,9 @@ static int wsaioHexDigitToInt(int hx) {
 }
 
 /* 
-If OpenSSL is not linked with jsvar, we need another implementation of SHA1.
-The SHA1 code originates from https://github.com/clibs/sha1, all credits
-for it belongs to Steve Reid.
+   If OpenSSL is not linked with jsvar, we need another implementation of SHA1.
+   The SHA1 code originates from https://github.com/clibs/sha1, all credits
+   for it belongs to Steve Reid.
 */
 #if BAIO_USE_OPEN_SSL || WSAIO_USE_OPEN_SSL || JSVAR_USE_OPEN_SSL
 
@@ -3856,9 +3856,9 @@ for it belongs to Steve Reid.
 /////////////////////////////////////////////////////////
 // start of included sha1.[hc] code
 /*
-SHA-1 in C
-By Steve Reid <steve@edmweb.com>
-100% Public Domain
+  SHA-1 in C
+  By Steve Reid <steve@edmweb.com>
+  100% Public Domain
 */
 /* #define LITTLE_ENDIAN * This should be #define'd already, if true. */
 /* #define SHA1HANDSOFF * Copies data before messing with it. */
@@ -3900,14 +3900,14 @@ void SHA1(
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 #if BYTE_ORDER == LITTLE_ENDIAN
 #define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
-    |(rol(block->l[i],8)&0x00FF00FF))
+                 |(rol(block->l[i],8)&0x00FF00FF))
 #elif BYTE_ORDER == BIG_ENDIAN
 #define blk0(i) block->l[i]
 #else
 #error "Endianness not defined!"
 #endif
 #define blk(i) (block->l[i&15] = rol(block->l[(i+13)&15]^block->l[(i+8)&15] \
-    ^block->l[(i+2)&15]^block->l[i&15],1))
+                                     ^block->l[(i+2)&15]^block->l[i&15],1))
 
 /* (R0+R1), R2, R3, R4 are the different operations used in SHA1 */
 #define R0(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(i)+0x5A827999+rol(v,5);w=rol(w,30);
@@ -3921,19 +3921,19 @@ void SHA1(
 void SHA1Transform(
     uint32_t state[5],
     const unsigned char buffer[64]
-)
+    )
 {
     uint32_t a, b, c, d, e;
-
+    
     typedef union
     {
         unsigned char c[64];
         uint32_t l[16];
     } CHAR64LONG16;
-
+    
 #ifdef SHA1HANDSOFF
     CHAR64LONG16 block[1];      /* use array to appear as a pointer */
-
+    
     memcpy(block, buffer, 64);
 #else
     /* The following had better never be used because it causes the
@@ -4048,7 +4048,7 @@ void SHA1Transform(
 
 void SHA1Init(
     SHA1_CTX * context
-)
+    )
 {
     /* SHA1 initialization constants */
     context->state[0] = 0x67452301;
@@ -4066,12 +4066,12 @@ void SHA1Update(
     SHA1_CTX * context,
     const unsigned char *data,
     uint32_t len
-)
+    )
 {
     uint32_t i;
-
+    
     uint32_t j;
-
+    
     j = context->count[0];
     if ((context->count[0] += len << 3) < j)
         context->count[1]++;
@@ -4098,14 +4098,14 @@ void SHA1Update(
 void SHA1Final(
     unsigned char digest[20],
     SHA1_CTX * context
-)
+    )
 {
     unsigned i;
-
+    
     unsigned char finalcount[8];
-
+    
     unsigned char c;
-
+    
 #if 0    /* untested "improvement" by DHR */
     /* Convert context->count to a sequence of bytes
      * in finalcount.  Second element first, but
@@ -4113,13 +4113,13 @@ void SHA1Final(
      * But we do it all backwards.
      */
     unsigned char *fcp = &finalcount[8];
-
+    
     for (i = 0; i < 2; i++)
     {
         uint32_t t = context->count[i];
-
+        
         int j;
-
+        
         for (j = 0; j < 4; t >>= 8, j++)
             *--fcp = (unsigned char) t}
 #else
@@ -4153,7 +4153,7 @@ void SHA1(
 {
     SHA1_CTX ctx;
     unsigned int ii;
-
+    
     SHA1Init(&ctx);
     for (ii=0; ii<len; ii+=1)
         SHA1Update(&ctx, (const unsigned char*)str + ii, 1);
@@ -4208,22 +4208,22 @@ static char *wsaioStrFindTwoNewlines(char *s) {
     return(NULL);
 }
 
-#define WSAIO_HTTP_HEADER_SET(name, namelen, val, vallen, header) { \
+#define WSAIO_HTTP_HEADER_SET(name, namelen, val, vallen, header) {     \
         if (strncasecmp(name, #header, sizeof(#header)-1) == 0) {       \
             wsaioHttpHeader[WSAIO_HTTP_HEADER_##header] = val;          \
-            wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_##header] = vallen;        \
+            wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_##header] = vallen;    \
         }                                                               \
     }
 #define WSAIO_HTTP_HEADER_SET2(name, namelen, val, vallen, header1, header2) { \
-        if (strncasecmp(name, #header1 "-" #header2, sizeof(#header1)+sizeof(#header2)-1) == 0) {       \
-            wsaioHttpHeader[WSAIO_HTTP_HEADER_##header1##_##header2] = val;         \
-            wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_##header1##_##header2] = vallen;       \
+        if (strncasecmp(name, #header1 "-" #header2, sizeof(#header1)+sizeof(#header2)-1) == 0) { \
+            wsaioHttpHeader[WSAIO_HTTP_HEADER_##header1##_##header2] = val; \
+            wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_##header1##_##header2] = vallen; \
         }                                                               \
     }
 #define WSAIO_HTTP_HEADER_SET3(name, namelen, val, vallen, header1, header2, header3) { \
-        if (strncasecmp(name, #header1 "-" #header2 "-" #header3, sizeof(#header1)+sizeof(#header2)+sizeof(#header3)-1) == 0) {     \
-            wsaioHttpHeader[WSAIO_HTTP_HEADER_##header1##_##header2##_##header3] = val;         \
-            wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_##header1##_##header2##_##header3] = vallen;       \
+        if (strncasecmp(name, #header1 "-" #header2 "-" #header3, sizeof(#header1)+sizeof(#header2)+sizeof(#header3)-1) == 0) { \
+            wsaioHttpHeader[WSAIO_HTTP_HEADER_##header1##_##header2##_##header3] = val; \
+            wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_##header1##_##header2##_##header3] = vallen; \
         }                                                               \
     }
 #define WSAIO_HTTP_HEADER_EQUALS(headerIndex, headerValue) (            \
@@ -4235,7 +4235,7 @@ static char *wsaioStrFindTwoNewlines(char *s) {
 static int wsaioHttpHeaderContains(int headerIndex, char *str) {
     char    *s;
     int     len;
-
+    
     len = strlen(str);
     s = wsaioHttpHeader[headerIndex];
     while (s != NULL && *s != 0) {
@@ -4289,7 +4289,7 @@ static void wsaioOnWwwToWebsocketProtocolSwitchRequest(struct wsaio *ww, struct 
     char            acceptKey[JSVAR_TMP_STRING_SIZE];
     unsigned char   sha1hash[SHA1_DIGEST_LENGTH];
     char            ttt[JSVAR_TMP_STRING_SIZE];
-
+    
     if (wsaioHttpHeader[WSAIO_HTTP_HEADER_Sec_WebSocket_Key] == NULL) goto wrongRequest;
     keylen = wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_Sec_WebSocket_Key];
     if (keylen + sizeof(WSAIO_WEBSOCKET_GUID) >= JSVAR_TMP_STRING_SIZE-1) {
@@ -4302,7 +4302,7 @@ static void wsaioOnWwwToWebsocketProtocolSwitchRequest(struct wsaio *ww, struct 
     JSVAR_SHA1((unsigned char*)ttt, sha1hash);
     acceptKeyLen = jsVarBase64Encode((char*)sha1hash, SHA1_DIGEST_LENGTH, acceptKey, sizeof(acceptKey));
     //printf("accept key ssl:   %s\n", acceptKey);
-
+    
     // Generate websocket accept header
     baioPrintfMsg(bb, 
                   "HTTP/1.1 101 Switching Protocols\r\n"
@@ -4321,16 +4321,16 @@ static void wsaioOnWwwToWebsocketProtocolSwitchRequest(struct wsaio *ww, struct 
                   wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_Origin],wsaioHttpHeader[WSAIO_HTTP_HEADER_Origin],
                   (ww->b.useSsl?"wss":"ws"), wsaioHttpHeaderLen[WSAIO_HTTP_HEADER_Host],wsaioHttpHeader[WSAIO_HTTP_HEADER_Host],uri
         );
-
+    
     bb->readBuffer.i += requestHeaderLen+contentLength;
     ww->state = WSAIO_STATE_WEBSOCKET_ACTIVE;
     ww->previouslySeenWebsocketFragmentsOffset = 0;
     wsaioWebsocketStartNewMessage(ww);
-
+    
     if (jsVarDebugLevel > 0) printf("%s: %s:%d: Switching protocol to websocket.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
     JSVAR_CALLBACK_CALL(ww->callBackOnWebsocketAccept, callBack(ww, uri));
     return;
-
+    
 wrongRequest:
     printf("%s: %s:%d: Closing connection: Wrong websocket protocol switch request.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
     baioClose(bb);
@@ -4352,14 +4352,14 @@ void wsaioHttpStartNewAnswer(struct wsaio *ww) {
 static void wsaioHttpFinishAnswerHeaderAndSendBuffer(struct wsaio *ww, char *statusCodeAndDescription, char *contentType, char *additionalHeaders, int chunkedFlag) {
     int         startIndex, contentLen, variableSizeAnswerHeaderLen;
     char        *ss, *dd;
-
+    
     if ((ww->b.status & BAIO_STATUS_ACTIVE) == 0) return;
-
+    
     startIndex = baioMsgLastStartIndex(&ww->b);
     ss = ww->b.writeBuffer.b + startIndex;
     contentLen = ww->b.writeBuffer.j - startIndex - ww->answerHeaderSpaceReserve - ww->fixedSizeAnswerHeaderLen;
     assert(contentLen >= 0);
-
+    
     variableSizeAnswerHeaderLen = sprintf(
         ss,
         "HTTP/1.1 %s\r\n"
@@ -4370,18 +4370,18 @@ static void wsaioHttpFinishAnswerHeaderAndSendBuffer(struct wsaio *ww, char *sta
         contentType,
         (additionalHeaders==NULL?"":additionalHeaders)
         );
-
+    
     if (chunkedFlag) {
         variableSizeAnswerHeaderLen += sprintf(ss + variableSizeAnswerHeaderLen, "Transfer-Encoding: chunked\r\n");
     } else {
         variableSizeAnswerHeaderLen += sprintf(ss + variableSizeAnswerHeaderLen, "Content-Length: %d\r\n", contentLen);
     }
-
+    
     assert(variableSizeAnswerHeaderLen < ww->answerHeaderSpaceReserve);
     // move it to the right place
     dd = ss + ww->answerHeaderSpaceReserve - variableSizeAnswerHeaderLen;
     memmove(dd, ss, variableSizeAnswerHeaderLen);
-
+    
     baioMsgResetStartIndexForNewMsgSize(&ww->b, variableSizeAnswerHeaderLen+ww->fixedSizeAnswerHeaderLen+contentLen);
     baioMsgSend(&ww->b);
 }
@@ -4397,7 +4397,7 @@ void wsaioHttpFinishAnswer(struct wsaio *ww, char *statusCodeAndDescription, cha
 
 void wsaioHttpStartChunkInChunkedAnswer(struct wsaio *ww) {
     int     r;
-
+    
     baioMsgStartNewMessage(&ww->b);
 #if EDEBUG
     r = baioPrintfToBuffer(&ww->b, "1234567890");
@@ -4416,34 +4416,34 @@ void wsaioHttpFinalizeAndSendCurrentChunk(struct wsaio *ww, int finalChunkFlag) 
     int         chunkSize;
     int         startIndex, n, r;
     char        *ss, *dd;
-
+    
     if ((ww->b.status & BAIO_STATUS_ACTIVE) == 0) return;
-
+    
     startIndex = baioMsgLastStartIndex(&ww->b);
     chunkSize = ww->b.writeBuffer.j - startIndex - WSAIO_CHUNKED_ANSWER_LENGTH_SPACE_RESERVE;
     assert(chunkSize >= 0);
-
+    
     // printf("chunkSize == %d && finalChunkFlag == %d\n",chunkSize, finalChunkFlag);
-
+    
     if (chunkSize == 0 && finalChunkFlag == 0) return;
-
+    
     // chunk terminates by CRLF
     r = baioWriteToBuffer(&ww->b, "\r\n", 2);
     // TODO: It may happen that there is not enough of space in write buffer for the CRLF
     JsVarInternalCheck(r == 2);
-
+    
     // get start index one more time, because previous write could wrap the buffer
     startIndex = baioMsgLastStartIndex(&ww->b);
     ss = ww->b.writeBuffer.b + startIndex;
-
+    
     // TODO: Simply print chunk size in reversed order up to (ss + WSAIO_CHUNKED_ANSWER_LENGTH_SPACE_RESERVE) 
     n = sprintf(ss, "%x\r\n", chunkSize);
     dd = ss + WSAIO_CHUNKED_ANSWER_LENGTH_SPACE_RESERVE - n;
     memmove(dd, ss, n);
-
+    
     baioMsgResetStartIndexForNewMsgSize(&ww->b, chunkSize+n+2);
     baioMsgSend(&ww->b);
-
+    
     if (chunkSize != 0) {
         if (finalChunkFlag) {
             r = baioPrintfMsg(&ww->b, "0\r\n\r\n");
@@ -4466,7 +4466,7 @@ char *wsaioGetFileMimeType(char *fname) {
     char        *mimetype;
     char        sss[JSVAR_TMP_STRING_SIZE];
     int         i;
-
+    
     mimetype = "text/html";
     if (1 || fname != NULL) {
         suffix = strrchr(fname, '.');
@@ -4495,7 +4495,7 @@ int wsaioHttpSendFile(struct wsaio *ww, char *fname) {
     FILE    *ff;
     char    b[WSAIO_SEND_FILE_BUFFER_SIZE];
     int     n, res;
-
+    
     ff = fopen(fname, "r");
     if (ff == NULL) {
         wsaioHttpFinishAnswer(ww, "404 Not Found", "text/html", NULL);
@@ -4525,10 +4525,10 @@ static int wsaioHttpSendFileAsyncCallBackOnError(struct baio *b) {
     // printf("CALLBACK ERROR\n"); fflush(stdout);
     src = baioFromMagic(b->u[0].i);
     dest = baioFromMagic(b->u[1].i);
-
+    
     if (src != NULL && src->fd >= 0) baioCloseFd(src);
     wsaioHttpSendFileAsyncRemoveCallbacks(dest);
-
+    
     baioCloseMagic(b->u[0].i);
     baioCloseMagic(b->u[1].i);
     return(0);
@@ -4537,21 +4537,21 @@ static int wsaioHttpSendFileAsyncCallBackOnError(struct baio *b) {
 static int wsaioHttpSendFileAsyncCallBackOnReadWrite(struct baio *b, int fromj, int num) {
     struct baio *src, *dest;
     int         n, srcsize, destsize, csize;
-
+    
     // printf("%s: CALLBACK COPY: fd == %d\n", JSVAR_PRINT_PREFIX(), b->fd); fflush(stdout);
-
+    
     src = baioFromMagic(b->u[0].i);
     dest = baioFromMagic(b->u[1].i);
-
+    
     if (dest == NULL) return(wsaioHttpSendFileAsyncCallBackOnError(b));
     // if src == NULL, we are just pumping rest of write buffer, do nothing
     if (src == NULL) return(0);
     srcsize = src->readBuffer.j - src->readBuffer.i;
     destsize = baioPossibleSpaceForWrite(dest)-WSAIO_CHUNKED_ANSWER_LENGTH_SPACE_RESERVE-8;
     csize = JSVAR_MIN(srcsize, destsize);
-
+    
     // printf("srcsize, destsize, csize == %d, %d, %d\n", srcsize, destsize, csize);
-
+    
     if (csize > 0) {
         // copy csize bytes from src to dest
         n = baioWriteToBuffer(dest, src->readBuffer.b+src->readBuffer.i, csize);
@@ -4578,9 +4578,9 @@ static int wsaioHttpSendFileAsyncCallBackOnReadWrite(struct baio *b, int fromj, 
 
 static int wsaioHttpForwardFromBaio(struct wsaio *ww, struct baio *bb, char *mimeType, char *additionalHeaders) {
     int                 cb1, cb2;
-
+    
     baioReadBufferResize(&bb->readBuffer, WSAIO_SEND_FILE_BUFFER_SIZE, WSAIO_SEND_FILE_BUFFER_SIZE);
-
+    
     jsVarCallBackAddToHook(&bb->callBackOnRead, (void *) wsaioHttpSendFileAsyncCallBackOnReadWrite);
     jsVarCallBackAddToHook(&bb->callBackOnEof, (void *) wsaioHttpSendFileAsyncCallBackOnReadWrite);
     jsVarCallBackAddToHook(&bb->callBackOnError, (void *) wsaioHttpSendFileAsyncCallBackOnError);
@@ -4588,16 +4588,16 @@ static int wsaioHttpForwardFromBaio(struct wsaio *ww, struct baio *bb, char *mim
     cb2 = jsVarCallBackAddToHook(&ww->b.callBackOnError, (void *) wsaioHttpSendFileAsyncCallBackOnError);
     bb->u[0].i = ww->b.u[0].i = bb->baioMagic;
     bb->u[1].i = ww->b.u[1].i = ww->b.baioMagic;
-
+    
     wsaioHttpFinishAnswerHeaderAndStartChunkedAnswer(ww, "200 OK", mimeType, additionalHeaders);
-
+    
     return(0);
 }
 
 int wsaioHttpForwardFd(struct wsaio *ww, int fd, char *mimeType, char *additionalHeaders) {
     struct baio         *bb;
     int                 r;
-
+    
     bb = baioNewBasic(BAIO_TYPE_FD, BAIO_IO_DIRECTION_READ, 0);
     if (bb == NULL) return(-1);
     bb->fd = fd;
@@ -4608,16 +4608,16 @@ int wsaioHttpForwardFd(struct wsaio *ww, int fd, char *mimeType, char *additiona
 int wsaioHttpForwardString(struct wsaio *ww, char *str, int strlen, char *mimeType) {
     struct baio         *bb;
     int                 cb1, cb2;
-
+    
     bb = baioNewPseudoFile(str, strlen, 0);
     if (bb == NULL) return(-1);
-
+    
     cb1 = jsVarCallBackAddToHook(&ww->b.callBackOnWrite, (void *) wsaioHttpSendFileAsyncCallBackOnReadWrite);
     cb2 = jsVarCallBackAddToHook(&ww->b.callBackOnError, (void *) wsaioHttpSendFileAsyncCallBackOnError);
-
+    
     bb->u[0].i = ww->b.u[0].i = bb->baioMagic;
     bb->u[1].i = ww->b.u[1].i = ww->b.baioMagic;
-
+    
     wsaioHttpFinishAnswerHeaderAndStartChunkedAnswer(ww, "200 OK", mimeType, NULL);
     return(0);
 }
@@ -4625,7 +4625,7 @@ int wsaioHttpForwardString(struct wsaio *ww, char *str, int strlen, char *mimeTy
 int wsaioHttpSendFileAsync(struct wsaio *ww, char *fname, char *additionalHeaders) {
     int             r;
     struct baio     *bb;
-
+    
 #if _WIN32
     bb = baioNewFile(fname, BAIO_IO_DIRECTION_READ, 0);
     // bb = baioNewSocketFile(fname, BAIO_IO_DIRECTION_READ, 0);
@@ -4637,7 +4637,7 @@ int wsaioHttpSendFileAsync(struct wsaio *ww, char *fname, char *additionalHeader
     if (bb == NULL) return(-1);
     // printf("%s: SendFileAsync %s: forwarding fd %d --> %d\n", JSVAR_PRINT_PREFIX(), fname, bb->fd, ww->b.fd);
     r = wsaioHttpForwardFromBaio(ww, bb, wsaioGetFileMimeType(fname), additionalHeaders);
-
+    
     return(r);
 }
 
@@ -4655,14 +4655,14 @@ int wsaioHttpSendDirectory(struct wsaio *ww, char *path, char *dirname, char *ad
     struct wsaioStrList *ll, *ee;
     
     bb = &ww->b;
-
+    
     baioPrintfToBuffer(
         bb,
         "<html>\n<head><title>Index of %s</title><style>td{padding:3px}</style></head>\n"
         "<body>\n<h1>Index of %s</h1>\n<table>\n<tr><th>Name</th><th>Last modified</th><th>Size</th></tr>\n",
         dirname, dirname
         );
-
+    
     ll = NULL;
     d = opendir(path);
     if (d != NULL) {
@@ -4690,7 +4690,7 @@ int wsaioHttpSendDirectory(struct wsaio *ww, char *path, char *dirname, char *ad
             ll = ee;
         }
     }
-
+    
     baioPrintfToBuffer(bb, "<tr><th colspan=3><hr></th></tr>\n</table>\n<address>JsVar Server</address></body>\n</html>\n");
     wsaioHttpFinishAnswer(ww, "200 OK", "text/html", additionalHeaders);
     
@@ -4706,7 +4706,7 @@ void wsaioWebsocketCompleteFrame(struct wsaio *ww, int opcode) {
     long long               payloadlen;
     struct baio             *bb;
     struct baioWriteBuffer  *b;
-
+    
     bb = &ww->b;
     if ((bb->status & BAIO_STATUS_ACTIVE) == 0) return;
     
@@ -4715,13 +4715,13 @@ void wsaioWebsocketCompleteFrame(struct wsaio *ww, int opcode) {
     assert(msgIndex >= 0);
     hh = b->b + msgIndex;
     payloadlen = b->j - msgIndex - 10;
-
+    
     // do not send empty messages
     if (payloadlen <= 0) return;
-
+    
     // TODO: Maybe implement fragmented messages
     headbyte = (opcode | WSAIO_WEBSOCKET_FIN_MSK);
-
+    
     // printf("msgIndex, b->j == %d, %d, payloadlen == %lld\n", msgIndex, b->j, payloadlen); fflush(stdout);
     if (payloadlen < 126) {
         msgSize = payloadlen+2;
@@ -4772,7 +4772,7 @@ int wsaioWebsocketVprintf(struct wsaio *ww, char *fmt, va_list arg_ptr) {
 int wsaioWebsocketPrintf(struct wsaio *ww, char *fmt, ...) {
     int             res;
     va_list         arg_ptr;
-
+    
     va_start(arg_ptr, fmt);
     res = wsaioWebsocketVprintf(ww, fmt, arg_ptr);
     va_end(arg_ptr);
@@ -4791,12 +4791,12 @@ enum wsaioRequestTypeEnum {
 static void wsaioOnWwwRequest(struct wsaio *ww, struct baio *bb, int requestHeaderLen, int contentLength, char *uri, int requestType) {
     int     r;
     int     maximalAcceptableContentLength;
-
+    
     ww->currentRequest.postQuery = bb->readBuffer.b + bb->readBuffer.i + requestHeaderLen;
     ww->requestSize = requestHeaderLen + contentLength;
     ww->state = WSAIO_STATE_WAITING_FOR_WWW_REQUEST;
     wsaioHttpStartNewAnswer(ww);
-
+    
     r = 0;
     if (requestType == WSAIO_RQT_GET) {
         JSVAR_CALLBACK_CALL(ww->callBackOnWwwGetRequest, (r = callBack(ww, uri)));
@@ -4806,10 +4806,10 @@ static void wsaioOnWwwRequest(struct wsaio *ww, struct baio *bb, int requestHead
         printf("%s: %s:%d: Web: Wrong requestType %d.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, requestType);
         goto wrongRequest;  
     }
-
+    
     // finalize answer
     return;
-
+    
 wrongRequest:
     printf("%s: %s:%d: Closing connection.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
     baioClose(bb);
@@ -4822,27 +4822,27 @@ static void wsaioOnWwwRead(struct wsaio *ww) {
     char            *fieldName, *fieldValue;
     char            *uristr, *query;
     int             i, uriLen, fieldNameLen, fieldValueLen;
-
+    
     bb = &ww->b;
-
+    
     assert(bb->readBuffer.j < bb->readBuffer.size);
     bb->readBuffer.b[bb->readBuffer.j] = 0;
-
+    
     hstart = bb->readBuffer.b + bb->readBuffer.i;
     hend = wsaioStrFindTwoNewlines(hstart);
-
+    
     // printf("READ %.*s\n",  bb->readBuffer.j - bb->readBuffer.i, hstart); fflush(stdout);
-
+    
     // if I do not have whole header, wait until I have
     if (hend == NULL) return;
-
+    
     if (ww->state != WSAIO_STATE_WAITING_FOR_WWW_REQUEST) {
         // we are still processing some async file sending here, wait until file is sent
         printf("%s: Info: Delayed answer to requests happened\n", JSVAR_PRINT_PREFIX());
         return;
     }
     // printf("GOT HEADER\n"); fflush(stdout);
-
+    
     // parsing of HTTP header 
     // clean previous http header values
     for(i=0; i<WSAIO_HTTP_HEADER_MAX; i++) {
@@ -4893,7 +4893,7 @@ static void wsaioOnWwwRead(struct wsaio *ww) {
     while (*s != '\n') s++;
     s++;
     requestHeaderLen = s - hstart;
-
+    
     // for the moment no chunked connection, content length required
     contentLength = 0;
     if (wsaioHttpHeader[WSAIO_HTTP_HEADER_Content_Length] != NULL) {
@@ -4905,10 +4905,10 @@ static void wsaioOnWwwRead(struct wsaio *ww) {
             goto wrongRequest;
         }
     }
-
+    
     // if we do not have whole request, do nothing
     if (bb->readBuffer.i + requestHeaderLen + contentLength > bb->readBuffer.j) return;
-
+    
     uristr[uriLen] = 0;
     query = strchr(uristr, '?');
     if (query == NULL) {
@@ -4920,7 +4920,7 @@ static void wsaioOnWwwRead(struct wsaio *ww) {
     ww->currentRequest.getQuery = query;
     ww->currentRequest.postQuery = "";      // will be set later
     wsaioUriDecode(uristr);
-
+    
     // only GET and POST method is accepted for the moment
     if (strncmp(method, "GET", 3) == 0) {
         if (wsaioHttpHeaderContains(WSAIO_HTTP_HEADER_Upgrade, "websocket") 
@@ -4934,9 +4934,9 @@ static void wsaioOnWwwRead(struct wsaio *ww) {
     } else {
         goto wrongRequest;
     }
-
+    
     return;
-
+    
 wrongRequest:
     printf("%s: %s:%d: Closing connection: Wrong request: %.*s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, (int)(hend-hstart), hstart);
     baioClose(bb);
@@ -4948,7 +4948,7 @@ static int wsaioCompactCompletedFragmentedWebsocketMessage(struct wsaio *ww, int
     int                 fin, masked, opcode, firstFrameFlag;
     unsigned            b;
     long long           payloadLen, payloadLenTotal;
-
+    
     bb = &ww->b;
     firstFrameFlag = 1;
     fin = 0;
@@ -4957,7 +4957,7 @@ static int wsaioCompactCompletedFragmentedWebsocketMessage(struct wsaio *ww, int
         b = *s++;
         fin = b & WSAIO_WEBSOCKET_FIN_MSK;
         opcode = b & WSAIO_WEBSOCKET_OP_CODE_MSK;
-
+        
         b = *s++;
         masked = b & WSAIO_WEBSOCKET_MASK_MSK;
         payloadLen = b & WSAIO_WEBSOCKET_PLEN_MSK;
@@ -4968,9 +4968,9 @@ static int wsaioCompactCompletedFragmentedWebsocketMessage(struct wsaio *ww, int
             payloadLen = (((((((((((((((long long)s[0]<<8)+s[1])<<8)+s[2])<<8)+s[3])<<8)+s[4])<<8)+s[5])<<8)+s[6])<<8)+s[7]);
             s += 8;
         }
-
+        
         if (masked) s += 4;
-
+        
         if (firstFrameFlag) {
             if (opcode !=  WSAIO_WEBSOCKET_OP_CODE_TEXT) return(-1);
             if (opcodeOut != NULL) *opcodeOut = opcode;
@@ -4999,7 +4999,7 @@ static void wsaioOnWsRead(struct wsaio *ww) {
     int                 maximalPayloadLen;
     int                 c, r, masked, opcode, fin, i;
     unsigned char       *s, *msgStart, *payload;
-
+    
     bb = &ww->b;
     // printf("WSREAD %.*s\n",  bb->readBuffer.j - bb->readBuffer.i, bb->readBuffer.b + bb->readBuffer.i); fflush(stdout);
     for(;;) {
@@ -5010,12 +5010,12 @@ static void wsaioOnWsRead(struct wsaio *ww) {
         // we need complete frame header
         availableSize = bb->readBuffer.j - bb->readBuffer.i - ww->previouslySeenWebsocketFragmentsOffset;
         if (availableSize < 2) return;
-
+        
         s = msgStart = (unsigned char *)bb->readBuffer.b + bb->readBuffer.i + ww->previouslySeenWebsocketFragmentsOffset;
         b = *s++;
         fin = b & WSAIO_WEBSOCKET_FIN_MSK;
         opcode = b & WSAIO_WEBSOCKET_OP_CODE_MSK;
-
+        
         b = *s++;
         masked = b & WSAIO_WEBSOCKET_MASK_MSK;
         payloadLen = b & WSAIO_WEBSOCKET_PLEN_MSK;
@@ -5034,7 +5034,7 @@ static void wsaioOnWsRead(struct wsaio *ww) {
             baioCloseOnError(bb);
             return;
         }
-
+        
         mask = NULL;
         if (masked) {
             // According to the standard, client shall always mask its data!
@@ -5043,14 +5043,14 @@ static void wsaioOnWsRead(struct wsaio *ww) {
         }
         // we are waiting for the whole frame before demasking it
         if (availableSize < s - msgStart + payloadLen) return;
-
+        
         payload = s;
         if (masked) {
             // demask payload
             for(i=0; i<payloadLen; i++) payload[i] ^= mask[i%4];
         }
         s += payloadLen;
-
+        
         // printf("%s: %s:%d: Info: opcode fin == %d, %d.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, opcode, fin);
         if (fin == 0) {
             // printf("%s: %s:%d: Info: received a fragmented websocket msg.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
@@ -5064,14 +5064,14 @@ static void wsaioOnWsRead(struct wsaio *ww) {
                 wsaioCompactCompletedFragmentedWebsocketMessage(ww, &opcode, &payload, &payloadLen);
             }
         }
-
+        
         if (opcode == WSAIO_WEBSOCKET_OP_CODE_TEXT || opcode == WSAIO_WEBSOCKET_OP_CODE_BIN) {
             r = 0;
-                        // Hmm. I think I can make it zero terminating. There shall be space in readbuffer
-                        assert((char*)(payload + payloadLen) - bb->readBuffer.b < bb->readBuffer.size);
-                        c = payload[payloadLen]; payload[payloadLen] = 0;
+            // Hmm. I think I can make it zero terminating. There shall be space in readbuffer
+            assert((char*)(payload + payloadLen) - bb->readBuffer.b < bb->readBuffer.size);
+            c = payload[payloadLen]; payload[payloadLen] = 0;
             JSVAR_CALLBACK_CALL(ww->callBackOnWebsocketGetMessage, (r = callBack(ww, (char*)payload, payloadLen)));
-                        payload[payloadLen] = c;
+            payload[payloadLen] = c;
         } else if (opcode == WSAIO_WEBSOCKET_OP_CODE_CLOSED) {
             if (jsVarDebugLevel > 0) printf("%s: Websocket connection closed by remote host.\n", JSVAR_PRINT_PREFIX());
             baioClose(bb);
@@ -5095,7 +5095,7 @@ static void wsaioOnWsRead(struct wsaio *ww) {
             baioCloseOnError(bb);
             return;
         }
-
+        
         // the whole message is processed whether it was fragmented or not
         bb->readBuffer.i = ((char*)s - bb->readBuffer.b);
         ww->previouslySeenWebsocketFragmentsOffset = 0;
@@ -5106,12 +5106,12 @@ static void wsaioOnWsRead(struct wsaio *ww) {
 
 static int wsaioOnBaioRead(struct baio *bb, int fromj, int n) {
     struct wsaio *ww;
-
+    
     ww = (struct wsaio *) bb;
-
+    
     // Hmm. Strangely, there are many invocations with size == 0 on my virtual machine
     // if (n == 0) return(0);
-
+    
     // We do not process new read requests unless having some space available in write buffer (to write headers, etc).
     if (baioPossibleSpaceForWrite(bb) < ww->minSpaceInWriteBufferToProcessRequest) {
         if (bb->maxWriteBufferSize < ww->minSpaceInWriteBufferToProcessRequest * 2) {
@@ -5125,7 +5125,7 @@ static int wsaioOnBaioRead(struct baio *bb, int fromj, int n) {
         }
         return(0);
     }
-
+    
     switch (ww->state) {
     case WSAIO_STATE_WAITING_FOR_WWW_REQUEST:
         wsaioOnWwwRead(ww);
@@ -5155,12 +5155,12 @@ static int wsaioOnBaioWrite(struct baio *bb, int fromi, int n) {
 
 static int wsaioOnBaioDelete(struct baio *bb) {
     struct wsaio *ww;
-
+    
     // printf("wsaioOnBaioDelete: bb==%p, bb->writeBuffer.b == %p\n", bb, bb->writeBuffer.b); fflush(stdout);
-
+    
     ww = (struct wsaio *) bb;
     JSVAR_CALLBACK_CALL(ww->callBackOnDelete, callBack(ww));
-
+    
     // free my hooks
     jsVarCallBackFreeHook(&ww->callBackAcceptFilter);
     jsVarCallBackFreeHook(&ww->callBackOnAccept);
@@ -5169,14 +5169,14 @@ static int wsaioOnBaioDelete(struct baio *bb) {
     jsVarCallBackFreeHook(&ww->callBackOnWebsocketAccept);
     jsVarCallBackFreeHook(&ww->callBackOnWebsocketGetMessage);
     jsVarCallBackFreeHook(&ww->callBackOnDelete);
-
+    
     return(0);
 }
 
 static int wsaioBaioAcceptFilter(struct baio *bb, unsigned ip, unsigned port) {
     struct wsaio    *ww;
     int             r;
-
+    
     ww = (struct wsaio *) bb;
     r = 0;
     JSVAR_CALLBACK_CALL(ww->callBackAcceptFilter, (r = callBack(ww, ip, port)));
@@ -5186,7 +5186,7 @@ static int wsaioBaioAcceptFilter(struct baio *bb, unsigned ip, unsigned port) {
 static int wsaioOnBaioAccept(struct baio *bb) {
     struct wsaio *ww;
     ww = (struct wsaio *) bb;
-
+    
     JSVAR_CALLBACK_CALL(ww->callBackOnAccept, callBack(ww));
     return(0);
 }
@@ -5194,7 +5194,7 @@ static int wsaioOnBaioAccept(struct baio *bb) {
 static int wsaioOnBaioTcpIpAccept(struct baio *bb) {
     struct wsaio *ww;
     ww = (struct wsaio *) bb;
-
+    
     jsVarCallBackCloneHook(&ww->callBackAcceptFilter, NULL);
     jsVarCallBackCloneHook(&ww->callBackOnTcpIpAccept, NULL);
     jsVarCallBackCloneHook(&ww->callBackOnAccept, NULL);
@@ -5203,27 +5203,27 @@ static int wsaioOnBaioTcpIpAccept(struct baio *bb) {
     jsVarCallBackCloneHook(&ww->callBackOnWebsocketAccept, NULL);
     jsVarCallBackCloneHook(&ww->callBackOnWebsocketGetMessage, NULL);
     jsVarCallBackCloneHook(&ww->callBackOnDelete, NULL);
-
+    
     JSVAR_CALLBACK_CALL(ww->callBackOnTcpIpAccept, callBack(ww));
-
+    
     return(0);
 }
 
 struct wsaio *wsaioNewServer(int port, enum baioSslFlags sslFlag, int additionalSpaceToAllocate) {
     struct wsaio    *ww;
     struct baio     *bb;
-
+    
     // casting pointer to the first element of struct is granted in ANSI C.
     bb = baioNewTcpipServer(port, sslFlag, sizeof(struct wsaio) - sizeof(struct baio) + additionalSpaceToAllocate);
     if (bb == NULL) return(NULL);
-
+    
     ww = (struct wsaio *) bb;
     ww->wsaioSecurityCheckCode = 0xcacebaf;
     ww->state = WSAIO_STATE_WAITING_FOR_WWW_REQUEST;
     ww->serverName = "myserver.com";
     ww->answerHeaderSpaceReserve = 256;
     ww->minSpaceInWriteBufferToProcessRequest = ww->answerHeaderSpaceReserve + 512;
-
+    
     bb->minFreeSizeAtEndOfReadBuffer = 1;
     jsVarCallBackAddToHook(&bb->callBackAcceptFilter, (void *) wsaioBaioAcceptFilter);
     jsVarCallBackAddToHook(&bb->callBackOnTcpIpAccept, (void *) wsaioOnBaioTcpIpAccept);
@@ -5239,19 +5239,19 @@ struct wsaio *wsaioNewServer(int port, enum baioSslFlags sslFlag, int additional
 char *jsVarUriCpyAndDecode(char **uri, char *dst, int dstlen) {
     char            *s, *d;
     int             i;
-
+    
     if (uri == NULL || *uri == NULL || dst == NULL) return(NULL);
-
-        s = *uri;
+    
+    s = *uri;
     dst[0] = 0;
     for(d=dst,i=0; *s && *s!='&' && i<dstlen-1; d++,s++,i++) *d = *s;
     *d = 0;
-        if (i >= dstlen-1) {
+    if (i >= dstlen-1) {
         printf("%s: %s:%d: Error: URI string larger than allocated space! Using only prefix: %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, dst);
-                while (*s && *s!='&') s++;
-        }
-        if (*s == '&') *uri = s+1;
-        else *uri = NULL;
+        while (*s && *s!='&') s++;
+    }
+    if (*s == '&') *uri = s+1;
+    else *uri = NULL;
     wsaioUriDecode(dst);
     return(dst);
 }
@@ -5259,15 +5259,15 @@ char *jsVarUriCpyAndDecode(char **uri, char *dst, int dstlen) {
 struct jsVarDstr *jsVarUriToDstr(char **uri) {
     struct jsVarDstr   *res;
     char               *s, *d;
-
-        if (uri == NULL || *uri == NULL) return(NULL);
+    
+    if (uri == NULL || *uri == NULL) return(NULL);
     s = *uri;
     res = jsVarDstrCreate();
     for(; *s && *s!='&'; s++) {
         jsVarDstrAddCharacter(res, *s);
     }
-        if (*s == '&') *uri = s+1;
-        else *uri = NULL;
+    if (*s == '&') *uri = s+1;
+    else *uri = NULL;
     jsVarDstrAddCharacter(res, 0);
     d = wsaioUriDecode(res->s);
     jsVarDstrTruncateToSize(res, d - res->s);
@@ -5312,9 +5312,9 @@ char *jsVarGetEnvPtr(char *env, char *key) {
     strncpy(kk+1, key, n);
     kk[n+1] = '=';
     kk[n+2] = 0;
-
+    
     // printf("looking for '%s' in '%s'\n", kk, env);
-
+    
     if (strncmp(env, kk+1, n+1) == 0) {
         s = env+n+1;
     } else {
@@ -5327,14 +5327,14 @@ char *jsVarGetEnvPtr(char *env, char *key) {
 char *jsVarGetEnv(char *env, char *key, char *dst, int dstlen) {
     char            *uri, *res;
     uri = jsVarGetEnvPtr(env, key);
-        res = jsVarUriCpyAndDecode(&uri, dst, dstlen);
+    res = jsVarUriCpyAndDecode(&uri, dst, dstlen);
     return(res);
 }
 struct jsVarDstr *jsVarGetEnvDstr(char *env, char *key) {
     struct jsVarDstr   *res;
     char               *uri;
     uri = jsVarGetEnvPtr(env, key);
-        res = jsVarUriToDstr(&uri);
+    res = jsVarUriToDstr(&uri);
     return(res);
 }
 char *jsVarGetEnv_st(char *env, char *key) {
@@ -5432,8 +5432,8 @@ static char *jsVarMainJavascript = JSVAR_STRINGIFY(
             return(res);
         }
         \n
-        // here we hold active websocket connection
-        jsvar.websocket = null;
+            // here we hold active websocket connection
+            jsvar.websocket = null;
         // This is the function allowing callbacks to C code
         jsvar.callback = function(msg) {
             // console.log("sending message", msg, nlen, index, vlen);
@@ -5495,9 +5495,9 @@ static int jsVarCallbackOnWebSocketGet(struct wsaio *ww, int fromj, int n) {
 
 static int jsVarCallbackOnDelete(struct wsaio *ww) {
     struct jsVaraio *jj;
-
+    
     jj = (struct jsVaraio *) ww;
-
+    
     if (jj->w.b.baioType == BAIO_TYPE_TCPIP_SERVER) {
         JSVAR_FREE(jj->singlePageText);
         JSVAR_FREE(jj->fileServerRootDir);
@@ -5511,14 +5511,14 @@ struct jsVaraio *jsVarNewServer(int port, enum baioSslFlags sslFlag, int additio
     
     ww = wsaioNewServer(port, sslFlag, sizeof(struct jsVaraio) - sizeof(struct wsaio) + additionalSpaceToAllocate);
     if (ww == NULL) return(NULL);
-
+    
     jj = (struct jsVaraio *) ww;
-
+    
     // we need to be able to write jsvar.js at once. TODO: Copy jsvarJavascriptText by some assynchronous pipe and remove this requirement
     // jj->w.minSpaceInWriteBufferToProcessRequest = strlen(jsvarJavascriptText) + 1024;
-
+    
     jsVarCallBackAddToHook(&ww->callBackOnDelete, (void *) jsVarCallbackOnDelete);
-
+    
     return(jj);
 }
 
@@ -5528,10 +5528,10 @@ static int jsVarCallbackOnWwwGetRequestSinglePage(struct wsaio *ww, char *uri) {
     struct jsVaraio     *jj;
     int                 r, jslen;
     struct baio         *bb;
-
+    
     jj = (struct jsVaraio *) ww;
     bb = &ww->b;
-
+    
     if (strcmp(uri, "/jsvarmainjavascript.js") == 0) {
         baioPrintfToBuffer(bb, "%s", jsVarMainJavascript);
         wsaioHttpFinishAnswer(ww, "200 OK", "text/javascript", NULL);
@@ -5550,24 +5550,24 @@ static int jsVarCallbackOnWwwGetRequestFile(struct wsaio *ww, char *uri) {
     char                nuri[JSVAR_PATH_MAX];
     char                path[2*JSVAR_PATH_MAX];
     struct stat         st;
-
+    
     jj = (struct jsVaraio *) ww;
     bb = &ww->b;
-
+    
     if (strcmp(uri, "/jsvarmainjavascript.js") == 0) {
         baioPrintfToBuffer(bb, "%s", jsVarMainJavascript);
         wsaioHttpFinishAnswer(ww, "200 OK", "text/javascript", NULL);
         return(1);
     }
-
+    
     ww = &jj->w;
     bb = &ww->b;
-
+    
     // printf("%s: FileServer: GET %s\n", JSVAR_PRINT_PREFIX(), uri);
-
+    
     if (uri == NULL) goto fail;
     if (uri[0] != '/') goto fail;
-
+    
     // resolve the name to avoid toxic names like "/../../secret.txt"
     for(i=0,j=0; i<JSVAR_PATH_MAX && uri[j];) {
         nuri[i] = uri[j];
@@ -5589,7 +5589,7 @@ static int jsVarCallbackOnWwwGetRequestFile(struct wsaio *ww, char *uri) {
     snprintf(path, sizeof(path), "%s%s", jj->fileServerRootDir, nuri);
     path[sizeof(path)-1] = 0;
     plen = strlen(path);
-
+    
     if (stat(path, &st) != 0) goto fail;
     
     if (S_ISDIR(st.st_mode) && plen < sizeof(path) - sizeof(JSVAR_INDEX_FILE_NAME) - 1) {
@@ -5621,7 +5621,7 @@ static int jsVarCallbackOnWwwGetRequestFile(struct wsaio *ww, char *uri) {
         ww->state = WSAIO_STATE_WAITING_PROCESSING_WWW_REQUEST;
     }
     return(1);
-
+    
 fail:
     wsaioHttpFinishAnswer(ww, "404 Not Found", "text/html", NULL);
     return(-1);
@@ -5697,7 +5697,7 @@ int jsVarSendDataAll(char *data, int len) {
 int jsVarVEval(struct jsVaraio *jj, char *fmt, va_list arg_ptr) {
     int                 len;
     struct jsVarDstr    *ss;
-
+    
     ss = jsVarDstrCreateByVPrintf(fmt, arg_ptr);
     len = baioWriteToBuffer(&jj->w.b, ss->s, ss->size);
     wsaioWebsocketCompleteMessage(&jj->w);
@@ -5708,7 +5708,7 @@ int jsVarVEval(struct jsVaraio *jj, char *fmt, va_list arg_ptr) {
 int jsVarEval(struct jsVaraio *jj, char *fmt, ...) {
     int             res;
     va_list         arg_ptr;
-
+    
     if (jj == NULL) return(-1);
     va_start(arg_ptr, fmt);
     res = jsVarVEval(jj, fmt, arg_ptr);
@@ -5722,7 +5722,7 @@ void jsVarEvalAll(char *fmt, ...) {
     va_list         arg_ptr;
     
     va_start(arg_ptr, fmt);
-   
+    
     for(i=0; i<BAIO_MAX_CONNECTIONS; i++) {
         // TODO: Keep list of all connected clients ?
         if (jsVarIsActiveConnection(baioTab[i], JSVAR_CON_WEBSOCKET_SERVER_CLIENT)) {
@@ -5732,7 +5732,7 @@ void jsVarEvalAll(char *fmt, ...) {
             jsVarVEval(jj, fmt, arg_ptr);
         }
     }
-
+    
     va_end(arg_ptr);
 }
 
@@ -5741,7 +5741,7 @@ int jsVarVWEval(struct jsVaraio *jj, wchar_t *fmt, va_list arg_ptr) {
     int                 len;
     struct jsVarWDstr   *ss;
     struct jsVarDstr    *sss;
-
+    
     ss = jsVarWDstrCreateByVPrintf(fmt, arg_ptr);
     // jsVarWDstrAddCharacter(ss, 0);
     sss = jsVarDstrCreate();
@@ -5762,7 +5762,7 @@ int jsVarVWEval(struct jsVaraio *jj, wchar_t *fmt, va_list arg_ptr) {
 int jsVarWEval(struct jsVaraio *jj, wchar_t *fmt, ...) {
     int             res;
     va_list         arg_ptr;
-
+    
     if (jj == NULL) return(-1);
     va_start(arg_ptr, fmt);
     res = jsVarVWEval(jj, fmt, arg_ptr);
@@ -5776,7 +5776,7 @@ void jsVarWEvalAll(wchar_t *fmt, ...) {
     va_list         arg_ptr;
     
     va_start(arg_ptr, fmt);
-   
+    
     for(i=0; i<BAIO_MAX_CONNECTIONS; i++) {
         // TODO: Keep list of all connected clients ?
         if (jsVarIsActiveConnection(baioTab[i], JSVAR_CON_WEBSOCKET_SERVER_CLIENT)) {
@@ -5786,7 +5786,7 @@ void jsVarWEvalAll(wchar_t *fmt, ...) {
             jsVarVWEval(jj, fmt, arg_ptr);
         }
     }
-
+    
     va_end(arg_ptr);
 }
 #endif
