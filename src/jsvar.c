@@ -5109,8 +5109,8 @@ static int wsaioOnBaioRead(struct baio *bb, int fromj, int n) {
     
     ww = (struct wsaio *) bb;
     
-    // Hmm. Strangely, there are many invocations with size == 0 on my virtual machine
-    // if (n == 0) return(0);
+    // It may happen that read is selected but reads 0 bytes.
+    if (n == 0) return(0);
     
     // We do not process new read requests unless having some space available in write buffer (to write headers, etc).
     if (baioPossibleSpaceForWrite(bb) < ww->minSpaceInWriteBufferToProcessRequest) {
