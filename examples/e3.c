@@ -25,7 +25,6 @@ int main() {
 
     // Custom  SSL private  key and  certificate has  to be  specified
     // BEFORE the first invocation of jsvar!
-
 #if READ_CERTIFICATE_FROM_FILE
 
     // If   you   set    up   variables   "baioSslServerKeyFile"   and
@@ -37,8 +36,8 @@ int main() {
     baioSslServerCertFile = "server.crt";
     
     // Note that  self signed version  of such files can  be generated
-    // for example by the command:  
-    // openssl req -x509 -nodes -days 99 -newkey rsa:1024 -keyout server.key -out server.crt
+    // by the command:  
+    // openssl req -x509 -nodes -days 99 -newkey rsa:2048 -keyout server.key -out server.crt
     
 #else
 
@@ -46,39 +45,57 @@ int main() {
     // directly into source code by assigning to "baioSslServerKeyPem"
     // and "baioSslServerCertPem".
     baioSslServerCertPem = 
-        "-----BEGIN CERTIFICATE-----\n"
-        "MIICWzCCAcSgAwIBAgIJALspuLQRgau8MA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV\n"
-        "BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX\n"
-        "aWRnaXRzIFB0eSBMdGQwHhcNMjIwNjI3MTMyOTA3WhcNMjIxMDA0MTMyOTA3WjBF\n"
-        "MQswCQYDVQQGEwJBVTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50\n"
-        "ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n"
-        "gQDGFch3zZBJX6iKrht4rXikoTm5vEi6Cs7PLv6Z2EVEZ6vklDrXruY/75Lge/Qr\n"
-        "3BOAw0BN20uf8xwFEAUxJBwSjnwj4pzO51KFXtRTei/DjIir78jy/rGNN7pID3Ms\n"
-        "WlvTcQUvIagJIgWCNwXMlit7A9EJpzFPN7d1Q4SjtWxOzwIDAQABo1MwUTAdBgNV\n"
-        "HQ4EFgQU3NF+2ceI3dui7lQfw/2Eqj+mz4EwHwYDVR0jBBgwFoAU3NF+2ceI3dui\n"
-        "7lQfw/2Eqj+mz4EwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOBgQCV\n"
-        "afR+43LUTWi4Pax93rDW7meOf6ddZ89TTCtRBDmNfIX6of/nsnQKhjowkbXWhLR6\n"
-        "QwfHUGgw1Cyh84aXtWn1GLEs5jnj+ngVPkdRePbJfdEya/Dpsk0YA+Ck2s5mE1hs\n"
-        "5/BYg81o1KfGudIzeQ3VyNkHqRI1677VcnlJhYzaDg==\n"
-        "-----END CERTIFICATE-----\n"
+	"-----BEGIN CERTIFICATE-----\n"
+	"MIIDazCCAlOgAwIBAgIUIdM7LCWeVWHzn4U/00LJihLpEI0wDQYJKoZIhvcNAQEL\n"
+	"BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM\n"
+	"GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMzAyMDExMTQzNTZaFw0yMzA1\n"
+	"MTExMTQzNTZaMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEw\n"
+	"HwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggEiMA0GCSqGSIb3DQEB\n"
+	"AQUAA4IBDwAwggEKAoIBAQCuQpVHQ47cPH53+eIM17XYuYpx9uj5kzsLCiEaGFfy\n"
+	"TA6G3NzEPtkAahP7IDNa+YCkQmccHbGU9L6RSBU9LSSzAA7JTedYKcV/K5jQooEU\n"
+	"azjQvPS9Tu9/9o5IFspVnIKlzn2I/ExihrNClGjD2i8rDeZxcI/xm2dGJUngm+rV\n"
+	"t1HHbAm+BAInTpez5mRCIWtLLV0HAgOxoU+POECk2CospXLt58jC+Ld0y3iDcLuR\n"
+	"E0VHv3Nbh7C8CtzYFdgP3/pWOGL32MijlvYxhTq31ByZNTG5DdD60ixYvU8z/nrU\n"
+	"L/fVFgcT1ju1MIZEH1Vnp+363C4Pw2LcW1HzIKwhUV9VAgMBAAGjUzBRMB0GA1Ud\n"
+	"DgQWBBS0BCAD800GdENGmJprTpp+tHpZHDAfBgNVHSMEGDAWgBS0BCAD800GdENG\n"
+	"mJprTpp+tHpZHDAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAY\n"
+	"XnUu6ZSU++Y7HPZ5AU9KiUKCQwFNIgXORZFTLcr3mnjtBwYVL8r0SlNT8LDdD6Ys\n"
+	"qO1obgzv+XHuWg5Sr7+GTOY4J8uAP7UsoM0i3uVv3FtvRz3HT/w90GLnU+F7OBfa\n"
+	"qFnpYLhAPk+I3iuUQAI1nRvnWKSVys1o25a93avElq5DR07misZoVAam/2U+zGKO\n"
+	"5UNE6ohRy6+6ohCniqGE4am6EPLbHPTkGzozb3QNlDDGJOmfLRZldvIIKEGSZR1r\n"
+	"3Mi5OrFY4Ey2VH40R10bi5QMR6H8PeprvEjtaSfyHkTSjQRT+hE6edW0tu5i6r6Q\n"
+	"G0s4QLNwajxqecWQ1hij\n"
+	"-----END CERTIFICATE-----\n"
         ;
     baioSslServerKeyPem = 
-        "-----BEGIN PRIVATE KEY-----\n"
-        "MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAMYVyHfNkElfqIqu\n"
-        "G3iteKShObm8SLoKzs8u/pnYRURnq+SUOteu5j/vkuB79CvcE4DDQE3bS5/zHAUQ\n"
-        "BTEkHBKOfCPinM7nUoVe1FN6L8OMiKvvyPL+sY03ukgPcyxaW9NxBS8hqAkiBYI3\n"
-        "BcyWK3sD0QmnMU83t3VDhKO1bE7PAgMBAAECgYAyHzrtjZdP6aOVC78pxwM67QzV\n"
-        "QZ5JbQithh+oQAAu8eid2yAUiU37qZxJrzO2kWZh84Xm7XFyVKqnYUlfCNsNKH3K\n"
-        "gW6G+MoBi6TRsiGRcN8a/TgsjK5Z2Ttf+5ps6bDg7dogmWTq9ZdmgIAQcYsRs/ze\n"
-        "7p6QSffGj4pv8LzpsQJBAPg9AWQP0v35FElAxbwhsxJUzDEyaay1ysVh3ziqIDPR\n"
-        "NO6S86Y8uCw8B0xLgIBsC4CVleYOk8Xew1vQbOs6zocCQQDMR1UEkChtqhzotZqC\n"
-        "jgRWMac1FW+qVXF3zoiv2H4P4eidGxyRdLpIQ5bcPRWkmTVjuxsmrQXQejGhSyeI\n"
-        "7Qd5AkEAoChj/FYFUBzizLxAlze63CnfsCIRcf+8OosBxQJmUmg42W/wSSHFxaxZ\n"
-        "HQ1dc/3Bkg1wsARZrQEjU9puW3oOgwJBAKHplBhmzrSFVh6Y+puqRwOunXJ0yCpB\n"
-        "SQuF908xkFG0ZHRJ7e3YkGIAuI1eGU56ZRfkUNPp5iblA3ttnytnfDkCQQDIJbAy\n"
-        "Ly2O929euQRAnN+BOWfKm8Wx72/Gm32hGOuZd1KBqrkmolny0P2vHhiEE1WzgIV8\n"
-        "frXTrRPJTdsEk1jc\n"
-        "-----END PRIVATE KEY-----\n"
+	"-----BEGIN PRIVATE KEY-----\n"
+	"MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCuQpVHQ47cPH53\n"
+	"+eIM17XYuYpx9uj5kzsLCiEaGFfyTA6G3NzEPtkAahP7IDNa+YCkQmccHbGU9L6R\n"
+	"SBU9LSSzAA7JTedYKcV/K5jQooEUazjQvPS9Tu9/9o5IFspVnIKlzn2I/ExihrNC\n"
+	"lGjD2i8rDeZxcI/xm2dGJUngm+rVt1HHbAm+BAInTpez5mRCIWtLLV0HAgOxoU+P\n"
+	"OECk2CospXLt58jC+Ld0y3iDcLuRE0VHv3Nbh7C8CtzYFdgP3/pWOGL32MijlvYx\n"
+	"hTq31ByZNTG5DdD60ixYvU8z/nrUL/fVFgcT1ju1MIZEH1Vnp+363C4Pw2LcW1Hz\n"
+	"IKwhUV9VAgMBAAECggEADMW1kk0Z1fubG2kVz/IpknJ6+sJprg1ECRmbdoGtRIWd\n"
+	"lPXwOnQOzLB5uXDRQsxByQhS7WUhxHSx2Q0q/VpnM7V/3/JVUAlzv8/uufAHPPtk\n"
+	"5SvMVmnINR1ZrV/6QY8gpk19twIjCR+tWOZuzVgbF/FDYDIrYr6Msb/+67cR3csc\n"
+	"Uu63P8Fc0tshs+TpLMa89hFzZ+JXzGjkHmpl16F5NglnJ4IYXwoKJ5fx7f6O/Cvh\n"
+	"QfsR4imRLHvvyE8dxAReMHSBqZOC+lTKC2Jnyupjc/z1jbNCX1qs1xCmRhWOWM8Z\n"
+	"jTdFGZlBC4T65JFgyhKJg/gu9Ttvr+9sbYGgSBDJsQKBgQDqTZHSZhAYI3zle5Ir\n"
+	"sui8bn8X3naCjGfpxDP6UCf2Dgmx6/D12PUYO9z7Sl34U4U5ma9HmPwJw6Uy2I/J\n"
+	"FQEn0n1bv1qmEMAJvb1u1E8obv8rlEOuf0r+Ojpbe/3P1sEwHe2T7dmgAHnblvmK\n"
+	"LfjHwFT3PQgRWApFI0pOERCE2QKBgQC+ZaACSltT7RCUnRN9ucgcys4db6c1NsZO\n"
+	"g36gBh2Lroz7Lu5vudc3ozIJ5Z1h9z1xBtxnEHb0wDgHn5lY3ZrH6xyGMLql5kjS\n"
+	"D++ZFP5dloKUTFgUpYWEhfu51BkNx0nT7gHtfiuUY9Z8+Up+pNC4XJlx2e6eX9Sk\n"
+	"MtQ4ZpYw3QKBgQCc+gNstzypL32KMlQoOuF6/Xzg/QbhSDiGghFg7zsWuyj7r1vt\n"
+	"GsJ6zgCry5NRwINNqA2rJnAWCqIvgrAyxIPVrkyWn4mYITjITfsQueWe7V7AT8FY\n"
+	"s6gG0/QtPtE54mPkXOjDZ2OaszbxTCE71rkK+2zxiE5TcGzRDWfHDd/HYQKBgE3/\n"
+	"k+1cSM248HHxZ2q6ESC6dHXap8VFCzhe5iDoYHI4r8i3ETb0Cxbf5D/psO/ROXp0\n"
+	"NRaDyDe8BzgYSdn97sq3ppfSnqQYEvz7SkyMLShp4FSgcfUDWg9QVC9slFbwrW4E\n"
+	"swV4CqJfxB6ugbYgDuF4DeR2QyreV15s9EOmwyCBAoGAKtuqPa6z346ClPuCYt/1\n"
+	"3uFYE9YWCAkb+gd/paMm+35ps8ceDeEGiaWWkhAnmzQADkaeWiZ0/IbZwcRmv4fz\n"
+	"5dXXwND/oqaJ4e4fGLxIA2v2Q1MMO98ikyvzABn2XTdeCjUTMSwANZa608VXNGFh\n"
+	"hqpwUPywBLahR8uvpLYrd7c=\n"
+	"-----END PRIVATE KEY-----\n"
         ;
 #endif
     

@@ -160,6 +160,7 @@ struct wsaioStrList {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // forward decls
 int baioMsgInProgress(struct baio *bb) ;
+static void wsaioOnWwwRead(struct wsaio *ww) ;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: add prefix jsvar
@@ -2854,6 +2855,7 @@ static int baioWriteOrSslWrite(struct baio *bb) {
         if (n < 0 && (errno == EWOULDBLOCK || errno == EAGAIN || errno == EINTR)) n = 0;
     } else {
         if (bb->sslHandle == NULL) return(-1);
+        ERR_clear_error();
         n = SSL_write(bb->sslHandle, b->b+b->i, b->ij - b->i);
         if (jsVarDebugLevel > 20) {printf("SSL_write(,,%d) returned %d\n", b->ij - b->i, n); fflush(stdout);}
         if (n < 0) {
@@ -3258,7 +3260,10 @@ struct baio *baioNewPseudoFile(char *string, int stringLength, int additionalSpa
 }
 
 //////////////////////////////////////////////////////////
-// baio piped file
+// baio piped file.  In most OS,  files are considered to be ready for
+// read immediately, no  matter the actual state.  it  may save server
+// resources if file  is read by executing 'cat file'  and reading its
+// output through a pipe.
 
 struct baio *baioNewPipedFile(char *path, int ioDirection, int additionalSpaceToAllocate) {
     struct baio     *bb;
@@ -3266,7 +3271,7 @@ struct baio *baioNewPipedFile(char *path, int ioDirection, int additionalSpaceTo
     char            *iod;
 
 #if _WIN32
-    printf("%s:%s:%d: Piped files are not available for Windows system. Use socket file instaed.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
+    printf("%s:%s:%d: Piped files are not available for Windows system. Use socket file instead.\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__);
     return(NULL);
 #else
 
@@ -3451,7 +3456,6 @@ struct baio *baioNewTcpipClient(char *hostName, int port, enum baioSslFlags sslF
         bb->status |= BAIO_BLOCKED_FOR_WRITE_IN_TCPIP_CONNECT;
     } else {
         printf("%s: %s:%d: Connect returned %d: %s!\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, r, JSVAR_STR_ERRNO());
-        printf("%s: %s", JSVAR_PRINT_PREFIX(), JSVAR_STR_ERRNO());
         goto failreturn;
     }
     return(bb);
@@ -3537,9 +3541,10 @@ failreturn:
 
 
 //////////////////////////////////////////////////////////
-// baio socket file
-
-// This is a simple TCP/IP server, accepting connection and sending/reading a file content.
+// baio  socket  file  This  is  a  simple  TCP/IP  server,  accepting
+// connection and  sending/reading a file content.   It is implemented
+// mainly because Windows OS does  not manage well reading/writting to
+// files via select or pipes.
 #if _WIN32
 DWORD WINAPI baioSocketFileServerThreadStartRoutine(LPVOID arg)
 #else
@@ -4386,6 +4391,8 @@ void wsaioHttpFinishAnswer(struct wsaio *ww, char *statusCodeAndDescription, cha
     // only when request was answered, we can start to process next request
     ww->b.readBuffer.i += ww->requestSize;
     ww->state = WSAIO_STATE_WAITING_FOR_WWW_REQUEST;
+    // If there is another pending request, process it
+    wsaioOnWwwRead(ww);
 }
 
 void wsaioHttpStartChunkInChunkedAnswer(struct wsaio *ww) {
@@ -4449,6 +4456,8 @@ void wsaioHttpFinalizeAndSendCurrentChunk(struct wsaio *ww, int finalChunkFlag) 
         // final one, we can start to process next request
         ww->b.readBuffer.i += ww->requestSize;  
         ww->state = WSAIO_STATE_WAITING_FOR_WWW_REQUEST;
+        // Check for other pending requests.
+        wsaioOnWwwRead(ww);
     }
 }
 
@@ -4555,14 +4564,14 @@ static int wsaioHttpSendFileAsyncCallBackOnReadWrite(struct baio *b, int fromj, 
     // test also destsize as we need to start the next chunk of a chunked answer
     if ((src->status & BAIO_STATUS_EOF_READ) && src->readBuffer.i == src->readBuffer.j) {
         // printf("%s: FINAL: fd == %d\n\n", JSVAR_PRINT_PREFIX(), b->fd);
-        // Hmm. Why I am closing it twice here ?
+        // This is to avoid sending closing chunk twice
         if (src->fd >= 0) {
             baioCloseFd(src);
             src->fd = -1;
+            baioCloseMagic(b->u[0].i);
+            wsaioHttpSendFileAsyncRemoveCallbacks(dest);
+            wsaioHttpFinalizeAndSendCurrentChunk((struct wsaio*)dest, 1);
         }
-        baioCloseMagic(b->u[0].i);
-        wsaioHttpSendFileAsyncRemoveCallbacks(dest);
-        wsaioHttpFinalizeAndSendCurrentChunk((struct wsaio*)dest, 1);
     }
     return(0);
 }
@@ -4617,9 +4626,14 @@ int wsaioHttpSendFileAsync(struct wsaio *ww, char *fname, char *additionalHeader
     int             r;
     struct baio     *bb;
 
+#if _WIN32
+    bb = baioNewFile(fname, BAIO_IO_DIRECTION_READ, 0);
+    // bb = baioNewSocketFile(fname, BAIO_IO_DIRECTION_READ, 0);
+#else
+    // On linux/Unix system, maybe prefer reading file through 'cat file'
     bb = baioNewFile(fname, BAIO_IO_DIRECTION_READ, 0);
     // bb = baioNewPipedFile(fname, BAIO_IO_DIRECTION_READ, 0);
-    // bb = baioNewSocketFile(fname, BAIO_IO_DIRECTION_READ, 0);
+#endif  
     if (bb == NULL) return(-1);
     // printf("%s: SendFileAsync %s: forwarding fd %d --> %d\n", JSVAR_PRINT_PREFIX(), fname, bb->fd, ww->b.fd);
     r = wsaioHttpForwardFromBaio(ww, bb, wsaioGetFileMimeType(fname), additionalHeaders);
@@ -4823,7 +4837,9 @@ static void wsaioOnWwwRead(struct wsaio *ww) {
     if (hend == NULL) return;
 
     if (ww->state != WSAIO_STATE_WAITING_FOR_WWW_REQUEST) {
-        assert(0 && "Delayed answer to requests are not yet implemented");
+        // we are still processing some async file sending here, wait until file is sent
+        printf("%s: Info: Delayed answer to requests happened\n", JSVAR_PRINT_PREFIX());
+        return;
     }
     // printf("GOT HEADER\n"); fflush(stdout);
 
@@ -4981,7 +4997,7 @@ static void wsaioOnWsRead(struct wsaio *ww) {
     unsigned char       *mask;
     int                 availableSize;
     int                 maximalPayloadLen;
-    int                 r, masked, opcode, fin, i;
+    int                 c, r, masked, opcode, fin, i;
     unsigned char       *s, *msgStart, *payload;
 
     bb = &ww->b;
@@ -5051,8 +5067,11 @@ static void wsaioOnWsRead(struct wsaio *ww) {
 
         if (opcode == WSAIO_WEBSOCKET_OP_CODE_TEXT || opcode == WSAIO_WEBSOCKET_OP_CODE_BIN) {
             r = 0;
-            // JSVAR_CALLBACK_CALL(ww->callBackOnWebsocketGetMessage, (r = callBack(ww, bb->readBuffer.i+(payload-msgStart), payloadLen)));
+                        // Hmm. I think I can make it zero terminating. There shall be space in readbuffer
+                        assert((char*)(payload + payloadLen) - bb->readBuffer.b < bb->readBuffer.size);
+                        c = payload[payloadLen]; payload[payloadLen] = 0;
             JSVAR_CALLBACK_CALL(ww->callBackOnWebsocketGetMessage, (r = callBack(ww, (char*)payload, payloadLen)));
+                        payload[payloadLen] = c;
         } else if (opcode == WSAIO_WEBSOCKET_OP_CODE_CLOSED) {
             if (jsVarDebugLevel > 0) printf("%s: Websocket connection closed by remote host.\n", JSVAR_PRINT_PREFIX());
             baioClose(bb);
@@ -5090,6 +5109,9 @@ static int wsaioOnBaioRead(struct baio *bb, int fromj, int n) {
 
     ww = (struct wsaio *) bb;
 
+    // Hmm. Strangely, there are many invocations with size == 0 on my virtual machine
+    // if (n == 0) return(0);
+
     // We do not process new read requests unless having some space available in write buffer (to write headers, etc).
     if (baioPossibleSpaceForWrite(bb) < ww->minSpaceInWriteBufferToProcessRequest) {
         if (bb->maxWriteBufferSize < ww->minSpaceInWriteBufferToProcessRequest * 2) {
@@ -5107,6 +5129,10 @@ static int wsaioOnBaioRead(struct baio *bb, int fromj, int n) {
     switch (ww->state) {
     case WSAIO_STATE_WAITING_FOR_WWW_REQUEST:
         wsaioOnWwwRead(ww);
+        break;
+    case WSAIO_STATE_WAITING_PROCESSING_WWW_REQUEST:
+        // We do nothing here, because the previous request is beeing processed. Once it will be processed,
+        // we will come back to here
         break;
     case WSAIO_STATE_WEBSOCKET_ACTIVE:
         wsaioOnWsRead(ww);
@@ -5208,7 +5234,74 @@ struct wsaio *wsaioNewServer(int port, enum baioSslFlags sslFlag, int additional
     return(ww);
 }
 
-// This is supposed to retrieve a few short values. Would be slow for large environments
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+char *jsVarUriCpyAndDecode(char **uri, char *dst, int dstlen) {
+    char            *s, *d;
+    int             i;
+
+    if (uri == NULL || *uri == NULL || dst == NULL) return(NULL);
+
+        s = *uri;
+    dst[0] = 0;
+    for(d=dst,i=0; *s && *s!='&' && i<dstlen-1; d++,s++,i++) *d = *s;
+    *d = 0;
+        if (i >= dstlen-1) {
+        printf("%s: %s:%d: Error: URI string larger than allocated space! Using only prefix: %s\n", JSVAR_PRINT_PREFIX(), __FILE__, __LINE__, dst);
+                while (*s && *s!='&') s++;
+        }
+        if (*s == '&') *uri = s+1;
+        else *uri = NULL;
+    wsaioUriDecode(dst);
+    return(dst);
+}
+
+struct jsVarDstr *jsVarUriToDstr(char **uri) {
+    struct jsVarDstr   *res;
+    char               *s, *d;
+
+        if (uri == NULL || *uri == NULL) return(NULL);
+    s = *uri;
+    res = jsVarDstrCreate();
+    for(; *s && *s!='&'; s++) {
+        jsVarDstrAddCharacter(res, *s);
+    }
+        if (*s == '&') *uri = s+1;
+        else *uri = NULL;
+    jsVarDstrAddCharacter(res, 0);
+    d = wsaioUriDecode(res->s);
+    jsVarDstrTruncateToSize(res, d - res->s);
+    return(res);
+}
+
+char *jsVarUriTo_st(char **uri) {
+    char            *res;
+    if (uri == NULL || *uri == NULL) return(NULL);
+    res = baioStaticRingGetTemporaryStringPtr();
+    res = jsVarUriCpyAndDecode(uri, res, JSVAR_TMP_STRING_SIZE);
+    return(res);
+}
+
+int jsVarUriToInt(char **uri, int defaultValue) {
+    char *v;
+    v = jsVarUriTo_st(uri);
+    if (v == NULL) return(defaultValue);
+    return(atoi(v));
+}
+
+double jsVarUriToDouble(char **uri, double defaultValue) {
+    char *v;
+    v = jsVarUriTo_st(uri);
+    if (v == NULL) return(defaultValue);
+    return(strtod(v, NULL));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// A usual way of using callbaks is that callback function sends a string with request
+// encoded into a single string in form of a usual GET/POST HTML request,
+// i.e. a string in the form:
+//    key1=value1&key2=value2&...&keyn=valuen
+// Following functions retrieve valuei for given keyi and such a callback string
 char *jsVarGetEnvPtr(char *env, char *key) {
     int mn, n;
     char *s, kk[JSVAR_TMP_STRING_SIZE];
@@ -5231,72 +5324,56 @@ char *jsVarGetEnvPtr(char *env, char *key) {
     }
     return(s);
 }
-
 char *jsVarGetEnv(char *env, char *key, char *dst, int dstlen) {
-    char            *s, *d;
-    int             i;
-
-    if (env == NULL || key == NULL || dst == NULL) return(NULL);
-
-    dst[0] = 0;
-    s = jsVarGetEnvPtr(env, key);
-    if (s==NULL) return(NULL);
-
-    for(d=dst,i=0; *s && *s!='&' && i<dstlen-1; d++,s++,i++) *d = *s;
-    *d = 0;
-
-    wsaioUriDecode(dst);
-    return(dst);
-}
-
-struct jsVarDstr *jsVarGetEnvDstr(char *env, char *key) {
-    struct jsVarDstr   *res;
-    char               *s, *d;
-
-    if (env == NULL || key == NULL) return(NULL);
-    s = jsVarGetEnvPtr(env, key);
-    if (s==NULL) return(NULL);
-    res = jsVarDstrCreate();
-    for(; *s && *s!='&'; s++) {
-        jsVarDstrAddCharacter(res, *s);
-    }
-    jsVarDstrAddCharacter(res, 0);
-    d = wsaioUriDecode(res->s);
-    jsVarDstrTruncateToSize(res, d - res->s);
+    char            *uri, *res;
+    uri = jsVarGetEnvPtr(env, key);
+        res = jsVarUriCpyAndDecode(&uri, dst, dstlen);
     return(res);
 }
-
+struct jsVarDstr *jsVarGetEnvDstr(char *env, char *key) {
+    struct jsVarDstr   *res;
+    char               *uri;
+    uri = jsVarGetEnvPtr(env, key);
+        res = jsVarUriToDstr(&uri);
+    return(res);
+}
 char *jsVarGetEnv_st(char *env, char *key) {
     char            *res;
-
-    if (env == NULL || key == NULL) return(NULL);
     res = baioStaticRingGetTemporaryStringPtr();
     res = jsVarGetEnv(env, key, res, JSVAR_TMP_STRING_SIZE);
     return(res);
 }
-
 int jsVarGetEnvInt(char *env, char *key, int defaultValue) {
-    char *v;
-    v = jsVarGetEnv_st(env, key);
-    if (v == NULL) return(defaultValue);
-    return(atoi(v));
+    char *uri;
+    uri = jsVarGetEnv_st(env, key);
+    return(jsVarUriToInt(&uri, defaultValue));
 }
-
 double jsVarGetEnvDouble(char *env, char *key, double defaultValue) {
-    char *v;
-    v = jsVarGetEnv_st(env, key);
-    if (v == NULL) return(defaultValue);
-    return(strtod(v, NULL));
+    char *uri;
+    uri = jsVarGetEnv_st(env, key);
+    return(jsVarUriToDouble(&uri, defaultValue));
 }
 
-
-
-
-
-
-
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////
+// A simplified version of callback is  that callback function sends a string with request
+// encoded simply as a sequence of URIs, i.e. a string in the form:
+//   value1&value2&...&valuen
+// Following functions iterate through simplified request one URI component after another
+struct jsVarDstr *jsVarGetNextArgvDstr(char **uri) {
+    return(jsVarUriToDstr(uri));
+}
+char *jsVarGetNextArgv_st(char **uri) {
+    char            *res;
+    res = baioStaticRingGetTemporaryStringPtr();
+    res = jsVarUriCpyAndDecode(uri, res, JSVAR_TMP_STRING_SIZE);
+    return(res);
+}
+int jsVarGetNextArgvInt(char **uri, int defaultValue) {
+    return(jsVarUriToInt(uri, defaultValue));
+}
+double jsVarGetNextArgvDouble(char **uri, int argi, double defaultValue) {
+    return(jsVarUriToDouble(uri, defaultValue));
+}
 
 
 
@@ -5370,9 +5447,9 @@ static char *jsVarMainJavascript = JSVAR_STRINGIFY(
             jsvar.websocket = new WebSocket(wsurl, "jsync");
             jsvar.websocket.binaryType = "arraybuffer";
             jsvar.websocket.onopen = function() {
+                jsvar.connected = true;
                 if (jsvar.debuglevel > 10) console.log("JsVar:", (new Date()) + ": Websocket to "+wsurl+" is open");
                 if (jsvar.onConnected != null) jsvar.onConnected();
-                jsvar.connected = true;
             };
             jsvar.websocket.onmessage = function (evt) { 
                 var data = evt.data;
@@ -5525,6 +5602,7 @@ static int jsVarCallbackOnWwwGetRequestFile(struct wsaio *ww, char *uri) {
         if (stat(path, &st) == 0) {
             // index.html exists, load it
             wsaioHttpSendFileAsync(ww, path, NULL);
+            ww->state = WSAIO_STATE_WAITING_PROCESSING_WWW_REQUEST;
         } else {
             // index.html doesn't exists
             path[plen] = 0;
@@ -5538,6 +5616,9 @@ static int jsVarCallbackOnWwwGetRequestFile(struct wsaio *ww, char *uri) {
         if (stat(path, &st) != 0) goto fail;
         // return the file
         wsaioHttpSendFileAsync(ww, path, NULL);
+        // Prevent answering several requests at once from one connection. It would mix
+        // several async files into one answer
+        ww->state = WSAIO_STATE_WAITING_PROCESSING_WWW_REQUEST;
     }
     return(1);
 
@@ -5566,7 +5647,7 @@ struct jsVaraio *jsVarNewSinglePageServer(int port, enum baioSslFlags sslFlag, i
     jj = jsVarNewServer(port, sslFlag, additionalSpaceToAllocate);
     if (jj == NULL) return(NULL);
     jj->w.b.userRuntimeType = JSVAR_CON_SINGLE_PAGE_WEBSERVER;
-    jj->singlePageText = jsvarStrDuplicate(body);
+    jj->singlePageText = strDuplicate(body);
     jsVarCallBackAddToHook(&jj->w.callBackOnWwwGetRequest, (void *) jsVarCallbackOnWwwGetRequestSinglePage);
     jsVarCallBackAddToHook(&jj->w.callBackOnAccept, (void *) jsVarCallbackOnAcceptSinglePage);
     jsVarCallBackAddToHook(&jj->w.callBackOnWebsocketAccept, (void *) jsVarCallbackOnWebsocketAccept);
@@ -5578,7 +5659,7 @@ struct jsVaraio *jsVarNewFileServer(int port, enum baioSslFlags sslFlag, int add
     jj = jsVarNewServer(port, sslFlag, additionalSpaceToAllocate);
     if (jj == NULL) return(NULL);
     jj->w.b.userRuntimeType = JSVAR_CON_FILE_WEBSERVER;
-    jj->fileServerRootDir = jsvarStrDuplicate(rootDirectory);
+    jj->fileServerRootDir = strDuplicate(rootDirectory);
     jj->fileServerListDirectories = 1;
     jsVarCallBackAddToHook(&jj->w.callBackOnWwwGetRequest, (void *) jsVarCallbackOnWwwGetRequestFile);
     jsVarCallBackAddToHook(&jj->w.callBackOnAccept, (void *) jsVarCallbackOnAcceptFile);

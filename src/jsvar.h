@@ -527,6 +527,10 @@ struct jsVarDstr *jsVarGetEnvDstr(char *env, char *key) ;
 char *jsVarGetEnv_st(char *env, char *key) ;
 int jsVarGetEnvInt(char *env, char *key, int defaultValue) ;
 double jsVarGetEnvDouble(char *env, char *key, double defaultValue) ;
+struct jsVarDstr *jsVarGetNextArgvDstr(char **uri) ;
+char *jsVarGetNextArgv_st(char **uri) ;
+int jsVarGetNextArgvInt(char **uri, int defaultValue) ;
+double jsVarGetNextArgvDouble(char **uri, int argi, double defaultValue) ;
 
 void jsVarCallBackClearHook(struct jsVarCallBackHook *h) ;
 int jsVarCallBackAddToHook(struct jsVarCallBackHook *h, void *ptr) ;
