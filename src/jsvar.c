@@ -1089,7 +1089,7 @@ JSVAR_STATIC pid_t jsVarPopen2(char *command, int *in_fd, int *out_fd, int useBa
         if (in_fd != NULL) {
             close(pout[0]);
             dup2(pout[1], 1);
-            close(pin[1]);
+            close(pout[1]);
         } else {
             // if there is no pipe for stdout, join stderr.
             dup2(2, 1);
